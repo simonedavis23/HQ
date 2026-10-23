@@ -1465,6 +1465,12 @@ function askRun(raw){
  {const w=askWhen(q);if(w.date&&w.rest&&w.rest.split(' ').length<=10){const fmt=new Date(w.date+'T12:00').toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});
   if(/^(?:call|pay|buy|clean|fix|email|text|send|pick up|drop off|return|renew|wash|order|cancel|submit|finish|water|take out)\b/i.test(w.rest)){S.tasks.push({id:uid(),title:cap(w.rest),area:'Whole house',due:w.date,repeat:'Once',done:false});return{msg:'Added task "'+cap(w.rest)+'" due '+fmt+'.'}}
   const bd=/birthday|b-day|bday|anniversary/i.test(w.rest);S.events.push({id:uid(),title:cap(w.rest),date:w.date,end:'',time:w.time,note:'',cat:(()=>{try{return catOf({title:w.rest})}catch(_){return 'Other'}})(),rep:bd?12:0,task:false});return{msg:'Added "'+cap(w.rest)+'" to your calendar for '+fmt+(w.time?' at '+tf2(w.time):'')+(bd?', repeating every year':'')+'.'}}}
+ // simple fallback: "add milk", "get diapers", "milk and eggs" go to groceries unless it sounds like a chore
+ {let g=q.match(/^(?:add|put|get|buy|grab|order|pick up|we need|i need|need|we(?:'|’)?re out of|we are out of|out of|running low on|low on)\s+(?:some\s+|more\s+)?(.+)$/i),bare=false;if(!g){g=[q,q];bare=true}
+  const body=g[1].replace(/\s+(?:to|on|onto|in|into)\s+(?:the\s+|my\s+|our\s+)?(?:groc\w*|shopping|store|list|cart)(?:\s+list)?$/i,'').trim();
+  if(body&&body.split(' ').length<=12&&!/^(?:call|pay|clean|fix|email|text|send|return|renew|wash|cancel|submit|finish|water|take out|drop off|book|make|do|take|change|remind|schedule|task|todo|to-do)\b/i.test(body)){const its=askSplit(body);
+   if(its.length&&(!bare||its.every(t=>aisleOf(t)!=='Other'))){let n=0;its.forEach(t=>{if(!S.groceries.some(x=>!x.done&&x.title.toLowerCase()===t.toLowerCase())){S.groceries.push({id:uid(),title:cap(t),qty:'',aisle:'Other'});n++}});return{msg:n?'Added '+its.map(cap).join(', ')+' to your grocery list.':'Already on your grocery list.'}}}}
+ {const tb=q.replace(/^(?:add|put|create|new)\s+(?:a\s+)?(?:task\s+)?/i,'').trim();if(/^(?:call|pay|clean|fix|email|text|send|return|renew|wash|cancel|submit|finish|water|take out|drop off|take|change)\b/i.test(tb)&&tb.split(' ').length<=10){S.tasks.push({id:uid(),title:cap(tb),area:'Whole house',due:'',repeat:'Once',done:false});return{msg:'Added task "'+cap(tb)+'".'}}}
  return null}
 const tf2=t=>{const [h,mm]=t.split(':').map(Number);return (h%12||12)+(mm?':'+String(mm).padStart(2,'0'):'')+' '+(h<12?'AM':'PM')};
 let askUndo=null;
@@ -1472,7 +1478,7 @@ function askOpen(){if(document.getElementById('ask'))return;const d=document.cre
 function askClose(){const d=document.getElementById('ask');if(d)d.remove();try{if(AREC)AREC.stop()}catch(_){}}
 function askShow(msg,bad,undo){const o=document.getElementById('askout');if(!o)return;o.className='ask-out'+(bad?' bad':' ok');o.innerHTML=esc(msg)+(undo?' <button type="button" class="lnk" data-ak="undo">Undo</button>':'')}
 function askSubmit(){const i=document.getElementById('askin'),v=(i&&i.value||'').trim();if(!v)return;const snap=JSON.stringify({tasks:S.tasks,groceries:S.groceries,events:S.events,hubs:S.hubs||[]});let r;try{const parts=v.split(/\s*(?:;|\band also\b|\bthen\b|\balso\b)\s+/i).filter(Boolean);if(parts.length>1){const rs=parts.map(x=>askRun(x)||{msg:'Skipped: "'+x+'"',bad:1});r={msg:rs.map(z=>z.msg).join('\n'),bad:rs.every(z=>z.bad)}}else r=askRun(v)}catch(e){r={msg:'Something went wrong. Please try again.',bad:1}}
- if(!r){askShow('I did not catch that. Try something like "add milk to groceries" or "check off wash bedding".',1);return}
+ if(!r){askShow('I did not catch that. Try something like "add milk", "we need diapers" or "check off wash bedding".',1);return}
  if(r.go){askClose();render();return}
  if(!r.bad&&!r.info){askUndo=snap;save();render();if(i)i.value=''}
  askShow(r.msg,r.bad,!r.bad&&!r.info)}
