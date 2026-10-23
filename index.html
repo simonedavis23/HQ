@@ -710,10 +710,11 @@ const hap=()=>{try{if(navigator.vibrate&&navigator.vibrate(12))return}catch(_){}
  document.addEventListener('pointercancel',()=>{if(on)end(false);else{cancel();tile=null}});
  document.addEventListener('contextmenu',e=>{if(on||T)e.preventDefault()});
 })();
-function showSplash(force){try{const L=S.look||{};if(!force&&(window.claude||L.spon===false||sessionStorage.getItem('hq.sp')))return;sessionStorage.setItem('hq.sp','1');const old=document.getElementById('splash');if(old)old.remove();const d=document.createElement('div');d.id='splash';
+function showSplash(force){try{const L=S.look||{};const seen=+localStorage.getItem('hq.seen')||0;localStorage.setItem('hq.seen',Date.now());if(!force&&(window.claude||L.spon===false||Date.now()-seen<10*60*1000))return;const old=document.getElementById('splash');if(old)old.remove();const d=document.createElement('div');d.id='splash';
  d.style.background=(L.spimg?'linear-gradient(rgba(0,0,0,.18),rgba(0,0,0,.32)),url("'+L.spimg+'") center/cover':'linear-gradient(145deg,'+(L.spc1||'#b9737f')+' 0%,'+(L.spc2||'#cfa57a')+' 100%)');
- const hr=new Date().getHours(),g=L.spmsg||(hr<12?'Good Morning':hr<17?'Good Afternoon':'Good Evening');d.innerHTML='<h1>'+esc(homeName())+'</h1><i></i><p>'+esc(g)+'</p>';document.body.appendChild(d);const go=()=>{d.classList.add('out');setTimeout(()=>d.remove(),450)};d.addEventListener('click',go);setTimeout(go,force?1400:750)}catch(e){}}
+ const hr=new Date().getHours(),g=L.spmsg||(hr<12?'Good Morning':hr<17?'Good Afternoon':'Good Evening');d.innerHTML='<h1>'+esc(homeName())+'</h1><i></i><p>'+esc(g)+'</p>';document.body.appendChild(d);const go=()=>{d.classList.add('out');setTimeout(()=>d.remove(),450)};d.addEventListener('click',go);setTimeout(go,force?2200:1700)}catch(e){}}
 function loadSpImg(file){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const sc=Math.min(1,1000/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);c.getContext('2d').drawImage(im,0,0,c.width,c.height);S.look=S.look||{};const old=S.look.spimg;S.look.spimg=c.toDataURL('image/jpeg',.75);try{localStorage.setItem(K,JSON.stringify(S))}catch(e){if(old)S.look.spimg=old;else delete S.look.spimg;alert('That photo is too large to save. Try a smaller one.')}render()};im.src=r.result};r.readAsDataURL(file)}
+document.addEventListener('visibilitychange',()=>{try{localStorage.setItem('hq.seen',Date.now())}catch(_){}});addEventListener('pagehide',()=>{try{localStorage.setItem('hq.seen',Date.now())}catch(_){}});
 showSplash();
 try{restock()}catch(e){}
 applyLook();render();booting=false;startSync();
