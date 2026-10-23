@@ -244,6 +244,12 @@ a.btn{text-decoration:none;display:inline-block}
 #musicbtn{position:fixed;top:calc(18px + env(safe-area-inset-top));right:64px;z-index:50;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--a);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 10px rgba(80,50,40,.12);padding:0}
 #mush{position:fixed;inset:0;background:rgba(40,25,20,.5);z-index:94;display:flex;align-items:center;justify-content:center;padding:16px}.musb{background:var(--bg,#fbf3ec);color:#3a2d27;border-radius:18px;padding:18px;max-width:380px;width:100%;box-shadow:0 14px 50px rgba(0,0,0,.3)}.musb>b{font-family:'Playfair Display',Georgia,serif;font-size:22px}.musbig{width:100%;background:var(--a)!important;color:#fff!important;border:1px solid var(--a)!important;font-weight:700;padding:14px;margin-top:10px;font-size:16px}
 .hsw{margin-right:100px!important}
+
+.tip{display:flex;gap:10px;align-items:flex-start;background:rgba(201,162,92,.12);border:1px solid rgba(201,162,92,.32);border-radius:14px;padding:10px 13px;margin:0 0 12px;font-size:13.5px;line-height:1.5;color:#6d5a4c}.tip svg{flex:none;margin-top:1px;color:#b8893a}
+p.m,.czn{font-size:13.5px;line-height:1.55;color:#7a6a60;letter-spacing:.003em}
+.czn{border-left:2px solid rgba(201,162,92,.55);padding-left:10px;margin-left:2px}
+details.bbset>p.m,details.hdet>p.m{font-size:13.5px}
+@media (prefers-color-scheme:dark){.tip{color:#d9c9b8}.tip svg{color:#d9b46b}p.m,.czn{color:#b3a395}}
 </style>
 </head>
 <body>
@@ -680,7 +686,8 @@ const dleft=d=>d?Math.round((new Date(d+'T12:00')-new Date(today()+'T12:00'))/86
 const dtag=d=>{const n=dleft(d);if(n===null)return '';return n<0?`<span class="late">${-n} day${n===-1?'':'s'} overdue</span>`:n===0?'<span class="late">Today</span>':`in ${n} day${n===1?'':'s'}`};
 const longD=b=>b?new Date(b+'T12:00').toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}):'';
 const ageOf=b=>{if(!b)return '';const n=new Date(),d=new Date(b+'T12:00');let a=n.getFullYear()-d.getFullYear();if(n.getMonth()<d.getMonth()||(n.getMonth()===d.getMonth()&&n.getDate()<d.getDate()))a--;return a>=0?a+(a===1?' yr':' yrs'):''};
-const hint=t=>`<p class="m" style="margin:0 0 8px">${t}</p>`;
+const BULB='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg>';
+const hint=t=>`<div class="tip">${BULB}<span>${t}</span></div>`;
 const dfield=(k,x,f,label)=>`<label class="lb">${label}<input type="date" data-a="fld" data-k="${k}" data-i="${x.id}" data-f="${f}" value="${esc(x[f]||'')}"></label>`;
 function autoItems(d){const o=[],y=+d.slice(0,4);
  S.kids.forEach(k=>{if(k.born&&k.born.slice(5)===d.slice(5)&&y>+k.born.slice(0,4))o.push({title:`${k.title}’s birthday (${y-+k.born.slice(0,4)})`,hol:1,cat:'Holidays'})});
@@ -1163,7 +1170,7 @@ document.addEventListener('change',e=>{const bb=e.target&&e.target.dataset&&e.ta
 setInterval(()=>{if(document.hidden||!babyTabOn()||BL.sheet)return;if(blOn())blLoad();else render()},30000);
 
 function hubView(t){
- if(t==='hubnew')return{title:'New Hub',color:'#b5707c',parent:'today',html:`<p class="czn" style="margin-top:0">A hub is its own home page for one part of your life. Pick a starting point. You can rename, add or remove pages anytime.</p><div class="czc">${czfr('Hub Name','<input id="hname" placeholder="Optional" maxlength="24">')}</div><div class="bbjoin"><b>Join A Shared Baby Log</b><p class="m">Your partner already started one? Enter their code.</p><div class="bbadd"><input id="bb-jc" placeholder="Code" maxlength="8" autocapitalize="characters"><button class="btn" data-bb="join">Join</button></div><p class="m" id="bb-jm" style="color:var(--warn)"></p></div><div class="hcards">${HUBT.map((x,i)=>`<button type="button" class="hcard" data-h="mk" data-i="${i}"><b>${x[0]}</b><em>${x[1]}</em>${x[2].length?'<small>'+x[2].map(y=>y[0]).join(' · ')+'</small>':''}</button>`).join('')}</div>`};
+ if(t==='hubnew')return{title:'New Hub',color:'#b5707c',parent:'today',html:hint('A hub is its own home page for one part of your life. Pick a starting point. You can rename, add or remove pages anytime.')+`<div class="czc">${czfr('Hub Name','<input id="hname" placeholder="Optional" maxlength="24">')}</div><div class="bbjoin"><b>Join A Shared Baby Log</b><p class="m">Your partner already started one? Enter their code.</p><div class="bbadd"><input id="bb-jc" placeholder="Code" maxlength="8" autocapitalize="characters"><button class="btn" data-bb="join">Join</button></div><p class="m" id="bb-jm" style="color:var(--warn)"></p></div><div class="hcards">${HUBT.map((x,i)=>`<button type="button" class="hcard" data-h="mk" data-i="${i}"><b>${x[0]}</b><em>${x[1]}</em>${x[2].length?'<small>'+x[2].map(y=>y[0]).join(' · ')+'</small>':''}</button>`).join('')}</div>`};
  if(t==='hubord'){const L=hubList();return{title:'Arrange Hubs',color:'#b5707c',parent:'today',html:`<p class="czn" style="margin-top:0">Use the arrows to move a hub up or down. The order here is the order in the hub menu.</p><div class="hlist">${L.map((x,i)=>`<div class="hrow"><div class="hx"><b>${esc(x.name)}</b></div><button type="button" class="ib" data-ho="up" data-id="${x.id}" aria-label="Move Up"${i?'':' disabled style="opacity:.25"'}>▲</button><button type="button" class="ib" data-ho="dn" data-id="${x.id}" aria-label="Move Down"${i<L.length-1?'':' disabled style="opacity:.25"'}>▼</button></div>`).join('')}</div><div class="bar" style="justify-content:center;margin-top:14px"><button class="btn" data-tab="today">Done</button></div>`}}
  const m=/^(h|he|p):([^:]+)(?::(.+))?$/.exec(t);if(!m)return null;
  const h=hubOf(m[2]);if(!h){tab='today';return null}
