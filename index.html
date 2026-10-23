@@ -161,6 +161,15 @@ a.btn{text-decoration:none;display:inline-block}
 .czcompact .czf span{font-size:14px}
 .czcompact .czf i{font-style:normal;color:var(--mut);font-size:12px;margin-left:6px}
 .czcompact .pill{padding:5px 14px;font-size:13px}
+
+.tiles.arr .tile{animation:wig .3s infinite ease-in-out;touch-action:none}
+.tiles.arr .tile:nth-child(even){animation-delay:-.15s}
+.tiles.arr .tile.lift{animation:none}
+.tile .tbd{position:absolute;right:12px;bottom:12px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.9);color:#3a2a28;font-style:normal;font-size:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 5px rgba(0,0,0,.22)}
+.arrbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;padding:10px 12px;background:var(--soft);border:1px solid var(--line);border-radius:14px;font-size:14px;color:var(--ink)}
+.arrbk{position:fixed;inset:0;background:rgba(30,20,20,.38);z-index:200}
+.arrc{position:fixed;left:0;right:0;bottom:0;z-index:201;background:var(--card);border-radius:22px 22px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.2);max-height:82vh;overflow:auto;color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.tiles.arr .tile{animation:none}}
 </style>
 </head>
 <body>
@@ -718,12 +727,13 @@ function vWeek(){
  WOPEN.seen=1;
  return panel('This Week',dl+`<div class="nv"><button class="btn ghost" data-a="wnav" data-n="-1" aria-label="Previous week">‹</button><h3>${short(wk===0&&t>st?t:st)} – ${short(addD(st,6))}</h3><button class="btn ghost" data-a="wnav" data-n="1" aria-label="Next week">›</button></div>${weekStrip(st,t)}<div style="display:grid;gap:10px">${days}</div>`);
 }
+function arrSheet(id){const T=TBS().find(z=>z[0]===id);if(!T)return '';const g=grpSel(id);return `<div class="arrbk" data-a="arrsx"></div><div class="arrc" role="dialog" aria-label="Edit box"><h3 style="margin:0 0 10px">Edit Box</h3><div class="czr" style="display:flex;gap:10px;align-items:center;margin-bottom:12px"><input type="color" class="cp sw" data-a="tcolor" data-t="${id}" value="${T[2]}" aria-label="Color"><input class="czname" data-a="tname" data-t="${id}" value="${esc(T[1])}" maxlength="24" aria-label="Name" style="flex:1"></div><div class="czx">${fpill(T[3]?'Change Photo':'Add Photo','timg','data-t="'+id+'"')}${T[3]?pill('Remove Photo','timgx','data-t="'+id+'"'):''}${(h=>h?h.replace('<select','<label class="pill">Shown In <select').replace('</select>','</select></label>'):'')(g)}${pill('Hide','tdel','data-t="'+id+'" style="color:var(--warn)"')}</div><div class="bar" style="justify-content:flex-end;margin-top:14px"><button class="btn" data-a="arrsx">Done</button></div></div>`}
 function tiles(c=''){
  if(tedit)return tileEdit(c);
  const t=today(),dn=(S.plan[t]||{}).Dinner;
  const w0=monday(t),w1=addD(w0,6),wc=S.tasks.filter(x=>!x.done&&x.due&&x.due>=w0&&x.due<=w1).length+S.events.filter(x=>x.date<=w1&&(x.end||x.date)>=w0).length;
  const info={income:(()=>{const I=S.income||[],c=I.filter(x=>x.status==='confirmed').length,p=I.filter(x=>(x.status||'potential')==='potential').length;return c||p?[c&&c+' confirmed',p&&p+' potential'].filter(Boolean).join(', '):'Add your pay'})(),reset:(R=>{const k=R.items.filter(x=>((R.done||{})[w0]||[]).includes(x.id)).length;return k+' of '+R.items.length+' done'})(S.reset||{items:[],done:{}}),week:wc+(wc===1?' item':' items'),tasks:S.tasks.filter(x=>!x.done).length+' open',groceries:S.groceries.filter(x=>!x.done).length+' to buy',meals:(dn?'Tonight: '+dn:'Plan your month'),events:S.events.filter(x=>(x.end||x.date)>=t).length+' upcoming',inventory:(S.staples||[]).length?(S.staples.length+(S.staples.length===1?' staple':' staples')+', restocks itself'):'Restocks itself',contacts:S.contacts.length+' saved',kids:S.kids.length+(S.kids.length===1?' profile':' profiles'),chores:S.chores.filter(x=>x.kind==='Chore'&&x.doneOn!==today()).length+' chores left',bills:S.bills.filter(x=>!x.done&&x.due&&dleft(x.due)<=7).length+' due this week',maint:S.maint.filter(x=>!x.done&&x.due&&dleft(x.due)<=14).length+' due soon',vehicles:S.vehicles.length+' saved',docs:(n=>n?n+' expiring soon':S.docs.length+' saved')(S.docs.filter(x=>x.expires&&dleft(x.expires)<=60).length),emergency:S.emergency.length+' saved'};
- return (c===''?hChips('today')+todayCard():'')+'<div class="tiles'+(c?' sub':'')+'">'+items(c).map((x,ix,arr)=>`<button class="tile" style="${tileCss(x,ix,arr.length)}${(S.look&&S.look.glass)?';text-shadow:'+((x[3]&&txt(tcAdj(x[2]))==='#fff')?'0 1px 3px rgba(0,0,0,.6)':'0 1px 3px rgba(255,255,255,.7)'):''}${imgBg(x)}" data-tab="${x[0]}"><b>${x[1]}</b><span>${esc(x[0].startsWith('g:')?grpInfo(x[0]):info[x[0]])}</span>${ico(x[0])}</button>`).join('')+'</div><div class="bar" style="justify-content:flex-end">'+((!window.claude&&!SBS&&c==='')?'<button class="lnk" style="padding:8px 4px;margin-right:auto" data-a="sbopen">Sign In To Sync</button>':'')+'<button class="lnk" style="padding:8px 4px" data-a="tedit">Customize</button></div>';
+ return (c===''?hChips('today')+todayCard():'')+(ARR?'<div class="arrbar"><span>Drag to rearrange. Tap a box to edit it.</span><button class="btn" data-a="arrdone">Done</button></div>':'')+'<div class="tiles'+(c?' sub':'')+(ARR?' arr':'')+'">'+items(c).map((x,ix,arr)=>`<button class="tile" style="${tileCss(x,ix,arr.length)}${(S.look&&S.look.glass)?';text-shadow:'+((x[3]&&txt(tcAdj(x[2]))==='#fff')?'0 1px 3px rgba(0,0,0,.6)':'0 1px 3px rgba(255,255,255,.7)'):''}${imgBg(x)}" data-tab="${x[0]}"><b>${x[1]}</b><span>${esc(x[0].startsWith('g:')?grpInfo(x[0]):info[x[0]])}</span>${ico(x[0])}${ARR?'<i class="tbd">✎</i>':''}</button>`).join('')+'</div>'+(ARR?'':'<div class="bar" style="justify-content:flex-end">'+((!window.claude&&!SBS&&c==='')?'<button class="lnk" style="padding:8px 4px;margin-right:auto" data-a="sbopen">Sign In To Sync</button>':'')+'<button class="lnk" style="padding:8px 4px" data-a="arron">Rearrange</button><button class="lnk" style="padding:8px 4px" data-a="tedit">Customize</button></div>')+(ARR&&ARRS?arrSheet(ARRS):'');
 }
 const FONTH=[['Cormorant Garamond','Cormorant+Garamond:wght@500;600;700'],['Playfair Display','Playfair+Display:wght@500;600;700'],['Bodoni Moda','Bodoni+Moda:wght@500;600;700'],['DM Serif Display','DM+Serif+Display'],['Marcellus','Marcellus'],['Cinzel','Cinzel:wght@500;600;700'],['Italiana','Italiana'],['Tenor Sans','Tenor+Sans'],['Josefin Sans','Josefin+Sans:wght@500;600;700'],['Lora','Lora:wght@500;600;700'],['Great Vibes','Great+Vibes'],['Caveat','Caveat:wght@500;600;700']];
 const FONTB=[['Nunito Sans','Nunito+Sans:wght@400;600;700'],['Jost','Jost:wght@400;500;600'],['Lato','Lato:wght@400;700'],['Montserrat','Montserrat:wght@400;500;600'],['DM Sans','DM+Sans:wght@400;500;600'],['Raleway','Raleway:wght@400;500;600'],['Quicksand','Quicksand:wght@400;600;700'],['Figtree','Figtree:wght@400;500;600'],['Poppins','Poppins:wght@400;500;600'],['Lora','Lora:wght@400;500;600'],['Inter','Inter:wght@400;500;600']];
@@ -877,7 +887,8 @@ const find=(k,id)=>S[k].find(x=>x.id===id);
 document.addEventListener('click',e=>{
  if(Date.now()<noClk){e.preventDefault();e.stopPropagation();return}
  const tb=e.target.closest('[data-tab],[data-go]');
- if(tb){tab=tb.dataset.tab||tb.dataset.go;msg='';radd=false;tedit='';if(tab==='week')wk=0;try{location.hash=tab}catch(_){}render();return}
+ if(tb&&ARR&&tb.classList.contains('tile')){e.preventDefault();ARRS=tb.dataset.tab;render();return}
+ if(tb){ARR=false;ARRS='';tab=tb.dataset.tab||tb.dataset.go;msg='';radd=false;tedit='';if(tab==='week')wk=0;try{location.hash=tab}catch(_){}render();return}
  const b=e.target.closest('[data-a]');if(!b)return;
  const a=b.dataset.a,i=b.dataset.i,k=b.dataset.k;msg='';if(a==='fav'||a==='redit'||a==='stnow')e.preventDefault();
  if(a==='tdy'){TCL=!TCL;render();return}if(a==='wjump'){const el=document.getElementById('d-'+b.dataset.d);wsel(b.dataset.d,1);if(el){el.open=true;WOPEN.add(b.dataset.d)}if(el)el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'});return}
@@ -915,7 +926,7 @@ document.addEventListener('click',e=>{
  else if(a==='bkdl')doBackup();
  else if(a==='icsdl'){doIcs();return}
  else if(a==='creset'){S.colors={}}
- else if(a==='tdel'){hideTab(b.dataset.t)}
+ else if(a==='tdel'){hideTab(b.dataset.t);ARRS=''}else if(a==='arrsx'){ARRS=''}else if(a==='arrdone'){ARR=false;ARRS=''}else if(a==='arron'){ARR=true;ARRS=''}
  else if(a==='tpurge'){if(confirm('Delete this box for good? Your Reset Boxes button can bring it back.'))hid()[b.dataset.t]=2}
  else if(a==='trest'){delete hid()[b.dataset.t]}
  else if(a==='mvl'||a==='mvr')moveItem(b.dataset.t,a==='mvl'?-1:1);
@@ -987,7 +998,7 @@ document.addEventListener('change',e=>{
  if(a==='shopday'||a==='shoptop'){S.shop=S.shop||{day:6,top:-1};if(a==='shopday'){S.shop.day=+e.target.value;S.tasks.forEach(x=>{if(/clean out fridge/i.test(x.title)&&x.repeat==='Weekly')x.due=nextOn(S.shop.day,today())})}else S.shop.top=+e.target.value;save();render();return}
  if(a==='rphoto'){const f=e.target.files&&e.target.files[0];if(f)recPhoto(f,e.target.dataset.i);return}
  if(a==='bkup'){const f=e.target.files&&e.target.files[0];if(f){const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);if(o&&typeof o==='object'&&Array.isArray(o.tasks)){S=Object.assign(def(),o);save();applyLook();render();setTimeout(()=>alert('Backup restored: '+(S.recipes||[]).length+' recipes, '+(S.bills||[]).length+' bills, '+(S.tasks||[]).length+' tasks.'),50)}else alert('That file doesn’t look like a binder backup.')}catch(_){alert('I couldn’t read that file. Make sure it’s the backup you downloaded.')}};rd.onerror=()=>alert('I couldn’t open that file.');rd.readAsText(f)}return}
- if(a==='tcolor'||a==='tname'){const t=e.target.dataset.t,o=S.tabs[t]=S.tabs[t]||{};if(a==='tcolor'){o.color=e.target.value;save();render()}else{const v=e.target.value.trim();if(v)o.name=cap(v);else delete o.name;save()}return}
+ if(a==='tcolor'||a==='tname'){const t=e.target.dataset.t,o=S.tabs[t]=S.tabs[t]||{};if(a==='tcolor'){o.color=e.target.value;save();render()}else{const v=e.target.value.trim();if(v)o.name=cap(v);else delete o.name;save();if(ARR)render()}return}
  if(a==='lsedit'){const x=find(e.target.dataset.k,e.target.dataset.i);if(x){const f=e.target.dataset.f,v=e.target.value;if(f==='title'){if(v.trim())x.title=cap(v.trim())}else x[f]=v;save();render()}return}
  if(a==='cashedit'){S.cash=+e.target.value||0;save();render();return}
  if(a==='incedit'){const x=find('income',e.target.dataset.i);if(x){const f=e.target.dataset.f,v=e.target.value;if(f==='title'){if(v.trim())x.title=cap(v.trim())}else if(f==='amount')x.amount=v;else if(f==='date')x.date=v;else if(f==='status')x.status=v;save();render()}return}
@@ -1137,7 +1148,7 @@ document.addEventListener('submit',e=>{if(e.target&&e.target.id==='askf'){e.prev
 (function(){const b=document.createElement('button');b.id='askbtn';b.type='button';b.setAttribute('aria-label','Ask');b.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/><path d="M19 17l.7 1.8 1.8.7-1.8.7L19 22l-.7-1.8-1.8-.7 1.8-.7L19 17z"/></svg>';document.body.appendChild(b)})();
 
 {const _r=render;render=function(){_r.apply(this,arguments);if(tab==='today')loadWx();document.querySelectorAll('.czname').forEach(czfit);try{document.fonts.ready.then(()=>document.querySelectorAll('.czname').forEach(czfit))}catch(e){}}}
-var noClk=0;
+var noClk=0,ARR=false,ARRS='';
 const hap=()=>{try{if(navigator.vibrate&&navigator.vibrate(12))return}catch(_){}try{const l=document.getElementById('hap');if(l)l.click()}catch(_){}};
 (function(){const l=document.createElement('label');l.id='hap';l.setAttribute('aria-hidden','true');l.style.cssText='position:fixed;left:0;bottom:0;width:40px;height:24px;opacity:.01;pointer-events:none;z-index:-1';l.innerHTML='<input type="checkbox" switch tabindex="-1">';document.body.appendChild(l);
  document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('button,summary,.tile,.cell,.chip,.pill');if(t&&!t.closest('.tiles.dm')&&!t.closest('form.edit,select'))hap()},true);
@@ -1149,8 +1160,8 @@ const hap=()=>{try{if(navigator.vibrate&&navigator.vibrate(12))return}catch(_){}
   if(drop&&tgt&&tgt!==tile){const id=tile.dataset.tab,tid=tgt.dataset.tab,L=lay(),a=L.order.indexOf(id),b=L.order.indexOf(tid);if(a>-1&&b>-1){L.order.splice(a,1);L.order.splice(b,0,id);save()}}
   if(drop&&tgt)hap();on=false;noClk=Date.now()+350;if(grid)grid.classList.remove('dm');if(tile){tile.classList.remove('lift');tile.style.transform=''}if(tgt)tgt.classList.remove('tgt');tile=grid=tgt=null;render()};
  document.addEventListener('pointerdown',e=>{if(tedit||e.button>0)return;const t=e.target.closest&&e.target.closest('.tiles .tile[data-tab]');if(!t)return;tile=t;grid=t.parentNode;sx=e.clientX;sy=e.clientY;cancel();
-  T=setTimeout(()=>{on=true;grid.classList.add('dm');tile.classList.add('lift');hap()},420)});
- document.addEventListener('pointermove',e=>{if(!tile)return;if(!on){if(Math.abs(e.clientX-sx)>9||Math.abs(e.clientY-sy)>9){cancel();tile=null}return}
+  if(ARR)return;T=setTimeout(()=>{ARR=true;on=true;grid.classList.add('dm');tile.classList.add('lift');hap()},420)});
+ document.addEventListener('pointermove',e=>{if(!tile)return;if(!on){if(ARR){if(Math.abs(e.clientX-sx)>6||Math.abs(e.clientY-sy)>6){on=true;grid.classList.add('dm');tile.classList.add('lift');hap()}else return}else{if(Math.abs(e.clientX-sx)>9||Math.abs(e.clientY-sy)>9){cancel();tile=null}return}}
   tile.style.transform='translate('+(e.clientX-sx)+'px,'+(e.clientY-sy)+'px) scale(1.05)';const u=under(e.clientX,e.clientY);if(tgt&&tgt!==u)tgt.classList.remove('tgt');tgt=u;if(u)u.classList.add('tgt');e.preventDefault()},{passive:false});
  document.addEventListener('touchmove',e=>{if(on)e.preventDefault()},{passive:false});
  document.addEventListener('pointerup',()=>{if(on)end(true);else{cancel();tile=null}});
