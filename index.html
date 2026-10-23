@@ -231,6 +231,8 @@ a.btn{text-decoration:none;display:inline-block}
 .fitch{width:100%;height:auto;color:var(--mut);margin:6px 0}.fitbar{height:8px;border-radius:4px;background:rgba(128,128,128,.2);margin:10px 0 2px;overflow:hidden}.fitbar i{display:block;height:100%;background:#4f9a62;border-radius:4px}
 #fitscan{position:fixed;inset:0;background:rgba(30,20,15,.7);z-index:96;display:flex;align-items:center;justify-content:center;padding:16px}.fitscb{background:var(--bg,#fbf3ec);border-radius:18px;padding:16px;max-width:420px;width:100%}.fitscb .btn{background:var(--a)!important;color:#fff!important;border:1px solid var(--a)!important;font-weight:700}
 .sunc .btn.ghost,.bbsh .btn.ghost{background:transparent!important;color:var(--a)!important;border:1px solid var(--a)!important}
+.sunw{padding:2px}.sunp{display:flex;gap:6px;margin-bottom:12px}.sunp i{flex:1;height:4px;border-radius:2px;background:rgba(128,128,128,.25)}.sunp i.on{background:var(--a)}.sunt{font-family:'Playfair Display',Georgia,serif;font-size:26px;margin:0 0 4px}
+.sunnav{justify-content:space-between;align-items:center;margin-top:16px}.sunnav .sunall{margin-left:auto}.sunsw{font-size:13px;padding:0 0 0 8px}.sund{padding:8px 0;border-bottom:1px solid rgba(128,128,128,.18)}.sund b{display:block;font-size:13px;color:var(--mut);margin-bottom:2px}.sund div{font-size:15px;padding:1px 0}
 </style>
 </head>
 <body>
@@ -1536,24 +1538,25 @@ function sunFill(st){const pool0=S.recipes.filter(r=>r.meal==='Dinner'),pool=poo
   (S.plan[k]=S.plan[k]||{}).Dinner=v;recent.push(v.toLowerCase());f++}
  save();return f}
 function sunGroc(st){let n=0;for(let j=0;j<7;j++){const d=addD(st,j),v=((S.plan[d]||{}).Dinner||'').trim().toLowerCase(),r=S.recipes.find(r=>r.title.toLowerCase()===v);if(r){n+=addIng(r);addSide(r,d)}}save();return n}
-function vSunday(){const st=sunStart(),en=addD(st,6),SD=S.sunday&&S.sunday.wk===st?S.sunday:{},days=[0,1,2,3,4,5,6].map(i=>addD(st,i));
- const din=days.map(d=>((S.plan[d]||{}).Dinner||'').trim()),miss=din.filter(x=>!x).length;
- const evs=days.map(d=>({d,l:holItems(d).filter(x=>x.cat!=='Bills').concat(evOn(d)).filter(x=>!(x.date&&x.date<d)).sort((a,b)=>(a.time||'').localeCompare(b.time||''))})).filter(x=>x.l.length);
- const all=(S.bills||[]).filter(x=>!x.done&&x.due&&x.due<=en).sort((a,b)=>a.due.localeCompare(b.due)),late=all.filter(x=>x.due<st),bills=all.filter(x=>x.due>=st),bt=bills.reduce((s,x)=>s+(+x.amount||0),0),lt=late.reduce((s,x)=>s+(+x.amount||0),0);
- const tks=(S.tasks||[]).filter(x=>!x.done&&x.due&&x.due<=en).sort((a,b)=>a.due.localeCompare(b.due));
- const sec=(t,ok,sub,body,btn)=>`<div class="sunc"><div class="sunh"><b>${t}</b><span class="sunst${ok?' ok':''}">${ok?'✓ ':''}${sub}</span></div>${body}${btn||''}</div>`;
- const dinB=`<div class="sunr">${days.map((d,i)=>`<div><span>${DAYS[i].slice(0,3)} ${short(d)}</span><b${din[i]?'':' class="sunno"'}>${esc(din[i]||'Not Planned')}</b></div>`).join('')}</div>`;
- const html=`<p class="m" style="margin:0 0 10px">${short(st)} – ${short(en)}. Check each part, fix what you need, then tap All Set.</p>`
- +sec('Dinners',miss===0,miss===0?'All planned':miss+' open',dinB,`<div class="bar" style="margin-top:8px">${miss?`<button class="btn" data-sun="fill">Fill Empty Days</button>`:''}<button class="lnk" data-tab="meals">Open Meal Planner</button></div>${SD.fill===-1?'<p class="m">Add some recipes first, then I can fill the week.</p>':''}`)
- +sec('Groceries',!!SD.groc,SD.groc?(SD.groc>0?SD.groc+' added':'Up to date'):'Not added yet',`<p class="m" style="margin:0">Add the ingredients for this week's dinners to your grocery list. Items already on it are skipped.</p>`,`<div class="bar" style="margin-top:8px"><button class="btn" data-sun="groc">Add This Week's Ingredients</button></div>`)
- +sec('Calendar',true,evs.length?evs.reduce((n,x)=>n+x.l.length,0)+' coming up':'Clear',evs.length?`<div class="sunr">${evs.map(x=>`<div><span>${fmt(x.d)}</span><b>${x.l.map(e=>esc((e.time?tf(e.time)+' ':'')+e.title)).join(' · ')}</b></div>`).join('')}</div>`:`<p class="m" style="margin:0">Nothing scheduled this week.</p>`,`<div class="bar" style="margin-top:8px"><button class="lnk" data-tab="events">Add An Event</button></div>`)
- +sec('Bills',!late.length,bills.length?bills.length+' Due'+(bt?' · '+money(bt):''):'None Due',(late.length?`<div class="sunr"><div><span style="color:var(--warn)">Past Due</span><b style="color:var(--warn)">${late.length} ${late.length===1?'Bill':'Bills'}${lt?' · '+money(lt):''}</b></div></div>`:'')+(bills.length?`<div class="sunr">${bills.map(x=>`<div><span>${fmt(x.due)}</span><b>${esc(x.title)}${x.amount?' · '+money(x.amount):''}</b></div>`).join('')}</div>`:(late.length?'':`<p class="m" style="margin:0">No bills due this week.</p>`)),late.length?`<div class="bar" style="margin-top:8px"><button class="lnk" data-tab="bills">Open Bills</button></div>`:'')
- +(tks.length?sec('Tasks',true,tks.length+(tks.length===1?' Task':' Tasks'),`<div class="sunr">${tks.map(x=>`<div><span>${fmt(x.due)}</span><b>${esc(x.title)}</b></div>`).join('')}</div>`,''):'')
- +`<div class="bar" style="justify-content:center;margin-top:14px">${SD.done?'<p class="m" style="text-align:center">You planned this week. Nice work.</p>':'<button class="btn sunall" data-sun="done">All Set For The Week</button>'}</div>`;
- return panel('Plan My Week',html)}
+let SUNP=0;
+function vSunday(){const st=sunStart(),en=addD(st,6),SD=S.sunday&&S.sunday.wk===st?S.sunday:{},days=[0,1,2,3,4,5,6].map(i=>addD(st,i)),N=4,p=Math.min(SUNP,N-1);
+ const din=days.map(d=>((S.plan[d]||{}).Dinner||'').trim()),miss=din.filter(x=>!x).length,nd=din.filter(x=>x&&!/^(take out|leftovers)$/i.test(x)).length;
+ const late=(S.bills||[]).filter(x=>!x.done&&x.due&&x.due<st).length;
+ const head=(t,sub)=>`<div class="sunp">${[0,1,2,3].map(i=>`<i class="${i<=p?'on':''}"></i>`).join('')}</div><h2 class="sunt">${t}</h2><p class="m" style="margin:0 0 12px">${sub}</p>`;
+ const nav=(label,act,dis)=>`<div class="bar sunnav">${p>0?'<button class="lnk" data-sun="back">Back</button>':'<span></span>'}<button class="btn sunall" data-sun="${act}"${dis?' disabled':''}>${label}</button></div>`;
+ let h='';
+ if(p===0){h=head('Dinners',short(st)+' – '+short(en)+(miss?'. '+miss+' still open.':'. All planned.'))+`<div class="sunr">${days.map((d,i)=>`<div><span>${DAYS[i].slice(0,3)}</span><b${din[i]?'':' class="sunno"'}>${esc(din[i]||'Not Planned')}</b>${din[i]&&!/^(take out|leftovers)$/i.test(din[i])?`<button class="lnk sunsw" data-sun="swap" data-d="${d}">Swap</button>`:''}</div>`).join('')}</div>${SD.fill===-1?'<p class="m">Add some recipes first, then I can fill the week.</p>':''}`+(miss?nav('Fill Empty Days','fill'):nav('Looks Good','next'))}
+ else if(p===1){h=head('Groceries',SD.groc!=null?(SD.groc>0?SD.groc+' items added to your list.':'Your list already has everything.'):'Add what this week\'s '+nd+(nd===1?' dinner needs':' dinners need')+' to your grocery list.')+(SD.groc!=null?nav('Next','next'):nav('Add To Grocery List','groc')+'<div class="bar" style="justify-content:center"><button class="lnk" data-sun="next">Skip</button></div>')}
+ else if(p===2){const rows=days.map(d=>{const ev=holItems(d).filter(x=>x.cat!=='Bills').concat(evOn(d)).filter(x=>!(x.date&&x.date<d)).sort((a,b)=>(a.time||'').localeCompare(b.time||'')),bl=(S.bills||[]).filter(x=>!x.done&&x.due===d),tk=(S.tasks||[]).filter(x=>!x.done&&x.due===d),L=ev.map(e=>(e.time?tf(e.time)+' ':'')+e.title).concat(bl.map(x=>'Bill: '+x.title+(x.amount?' '+money(x.amount):''))).concat(tk.map(x=>'To do: '+x.title));return L.length?`<div class="sund"><b>${fmt(d)}</b>${L.map(x=>`<div>${esc(x)}</div>`).join('')}</div>`:''}).join('');
+  h=head('Your Week',rows?'Here is everything coming up.':'Nothing scheduled yet.')+(rows||'<p class="czn">A clear week.</p>')+(late?`<p class="m" style="color:var(--warn);margin-top:10px">${late} ${late===1?'bill is':'bills are'} past due. <button class="lnk" data-tab="bills">Open Bills</button></p>`:'')+nav('Next','next')}
+ else{h=head(SD.done?'All Set':'Ready To Go',SD.done?'You planned this week. Nice work.':'Your week is planned.')+`<ul class="onbl"><li>${miss?miss+' dinners still open':'Dinners planned'}</li><li>${SD.groc!=null?'Grocery list updated':'Groceries not added yet'}</li><li>Calendar, bills and tasks reviewed</li></ul>`+(SD.done?`<div class="bar sunnav"><button class="lnk" data-sun="back">Back</button><button class="btn sunall" data-tab="today">Home</button></div>`:nav('All Set For The Week','done'))}
+ return panel('Plan My Week',`<div class="sunw">${h}</div>`)}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-sun]');if(!b)return;const a=b.dataset.sun,st=sunStart();S.sunday=(S.sunday&&S.sunday.wk===st)?S.sunday:{wk:st};
  if(a==='fill'){S.sunday.fill=sunFill(st);save();render();return}
- if(a==='groc'){S.sunday.groc=sunGroc(st);save();render();return}
+ if(a==='swap'){const d=b.dataset.d,pool0=S.recipes.filter(r=>r.meal==='Dinner'),pool=pool0.length?pool0:S.recipes,cur=((S.plan[d]||{}).Dinner||'').toLowerCase(),used=[0,1,2,3,4,5,6].map(i=>((S.plan[addD(st,i)]||{}).Dinner||'').toLowerCase()),ok=pool.filter(r=>!used.includes(r.title.toLowerCase()));const src=ok.length?ok:pool.filter(r=>r.title.toLowerCase()!==cur);if(src.length){(S.plan[d]=S.plan[d]||{}).Dinner=src[Math.floor(Math.random()*src.length)].title;save()}render();return}
+ if(a==='groc'){S.sunday.groc=sunGroc(st);save();SUNP=2;render();return}
+ if(a==='next'){SUNP=Math.min(3,SUNP+1);render();return}
+ if(a==='back'){SUNP=Math.max(0,SUNP-1);render();return}
  if(a==='done'){S.sunday.done=1;save();try{celebrate('sunday','Your week is planned!')}catch(_){}render()}});
 
 // ---------- Fitness: weight + food diary ----------
