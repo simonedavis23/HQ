@@ -926,7 +926,7 @@ if(!S.fix10){S.fix10=1;if(!S.reset||!S.reset.items||!S.reset.items.length)S.rese
 const czfit=el=>{try{const c=czfit.c||(czfit.c=document.createElement('canvas').getContext('2d'));c.font=getComputedStyle(el).font;el.style.width=Math.ceil(c.measureText(el.value||' ').width)+10+'px'}catch(_){}};
 /* ===== Ask (commands + voice) ===== */
 const AMON={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11},AWD={sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6};
-function askWhen(str){let t=' '+str+' ',date='',time='',m;
+function askWhen(str){let t=' '+String(str).replace(/@/g,' at ')+' ',date='',time='',m;
  if(m=t.match(/\s(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\.?(?=[\s,.!?]|$)/i)){let h=+m[1]%12;if(/p/i.test(m[3]))h+=12;time=String(h).padStart(2,'0')+':'+(m[2]||'00');t=t.replace(m[0],' ')}
  else if(m=t.match(/\sat\s+(\d{1,2})(?::(\d{2}))?(?=[\s,.!?]|$)/i)){let h=+m[1];if(h>=1&&h<7)h+=12;time=String(h).padStart(2,'0')+':'+(m[2]||'00');t=t.replace(m[0],' ')}
  const T=today();
@@ -984,6 +984,9 @@ function askRun(raw){
  // tasks
  if((m=q.match(new RegExp('^(?:add|put|create)\\s+(.+?)\\s+(?:to|on)\\s+'+tsk+'$','i')))||(m=q.match(/^(?:add\s+(?:a\s+)?task|new task|task|todo|to-do|remind me to|remember to|i need to|i have to|don(?:'|’)?t forget to)[:\s]+(.+)$/i))){const w=askWhen(m[1]);if(w.rest){S.tasks.push({id:uid(),title:cap(w.rest),area:'Whole house',due:w.date||'',repeat:'Once',done:false});return{msg:'Added task "'+cap(w.rest)+'"'+(w.date?' due '+new Date(w.date+'T12:00').toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'}):'')+'.'}}}
  if(m=q.match(/^(?:add|put|schedule|create|book)\s+(.+)$/i)){const w=askWhen(m[1].replace(/\s+(?:to|on|in)\s+(?:the\s+|my\s+|our\s+)?calendar$/i,''));if(w.date&&w.rest){const bd=/birthday|b-day|bday|anniversary/i.test(w.rest);S.events.push({id:uid(),title:cap(w.rest),date:w.date,end:'',time:w.time,note:'',cat:(()=>{try{return catOf({title:w.rest})}catch(_){return 'Other'}})(),rep:bd?12:0,task:false});return{msg:'Added "'+cap(w.rest)+'" to your calendar for '+new Date(w.date+'T12:00').toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})+(w.time?' at '+tf2(w.time):'')+(bd?', repeating every year':'')+'.'}}}
+ {const w=askWhen(q);if(w.date&&w.rest&&w.rest.split(' ').length<=10){const fmt=new Date(w.date+'T12:00').toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});
+  if(/^(?:call|pay|buy|clean|fix|email|text|send|pick up|drop off|return|renew|wash|order|cancel|submit|finish|water|take out)\b/i.test(w.rest)){S.tasks.push({id:uid(),title:cap(w.rest),area:'Whole house',due:w.date,repeat:'Once',done:false});return{msg:'Added task "'+cap(w.rest)+'" due '+fmt+'.'}}
+  const bd=/birthday|b-day|bday|anniversary/i.test(w.rest);S.events.push({id:uid(),title:cap(w.rest),date:w.date,end:'',time:w.time,note:'',cat:(()=>{try{return catOf({title:w.rest})}catch(_){return 'Other'}})(),rep:bd?12:0,task:false});return{msg:'Added "'+cap(w.rest)+'" to your calendar for '+fmt+(w.time?' at '+tf2(w.time):'')+(bd?', repeating every year':'')+'.'}}}
  return null}
 const tf2=t=>{const [h,mm]=t.split(':').map(Number);return (h%12||12)+(mm?':'+String(mm).padStart(2,'0'):'')+' '+(h<12?'AM':'PM')};
 let askUndo=null;
