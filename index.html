@@ -228,8 +228,8 @@ const nfSw=(f,on)=>`<label class="sw"><input type="checkbox" data-a="nfset" data
 let nfview='lock',cpd=0;
 function nfMock(){const n=nfP(),t=((S.look||{}).title||'My Life');const h=new Date().getHours(),g=h<12?'Good Morning':h<17?'Good Afternoon':'Good Evening';
  const d=new Date(),ds=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
- const lines=['9:00 AM  Dentist','Electric $120 due tomorrow','Dinner: Tacos'],ic=ICOURL||iconDraw();
- const card=(full)=>`<div class="nm-card"><img src="${ic}" alt=""><div class="nm-tx"><div class="nm-t"><b>${g}</b><span>now</span></div><div class="nm-b${full?'':' c'}">${esc(ds)} · 2 events · 1 bill due${full?'<br>'+lines.map(esc).join('<br>'):''}</div></div></div>`;
+ const lines=(S.loc&&S.loc.lat!=null&&nfP().weather?['☀️ 72° (51°–74°)']:[]).concat(['9:00 AM  Dentist','Electric $120 due tomorrow','Dinner: Tacos'],(closeLines()[0]?[closeLines()[0]]:[])),ic=ICOURL||iconDraw();
+ const card=(full)=>`<div class="nm-card"><img src="${ic}" alt=""><div class="nm-tx"><div class="nm-t"><b>${g}</b><span>now</span></div><div class="nm-b${full?'':' c'}">${full?lines.map(esc).join('<br>'):esc(lines[0])+(lines.length>1?' · '+esc(lines[1]):'')}</div></div></div>`;
  const tabs=`<div class="czs" style="margin:0 0 10px">${[['lock','Lock Screen'],['open','Phone Open']].map(z=>`<button class="${z[0]===nfview?'on':''}" data-a="nfv" data-v="${z[0]}">${z[1]}</button>`).join('')}</div>`;
  const scr=nfview==='lock'?`<div class="nm-s lock"><div class="nm-clock">${d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}).replace(/ [AP]M/,'')}</div><div class="nm-date">${esc(ds)}</div>${card(true)}</div>`:`<div class="nm-s open"><div class="nm-app"><span>${esc(t)}</span></div><div class="nm-ban">${card(false)}</div><div class="nm-hint">Press and hold the banner to expand it</div></div>`;
  return `<h3>How It Looks</h3>${tabs}${scr}<p class="czn">An approximate preview. Your phone controls the exact look, and the lock screen shows the full message while an open phone shows a short banner.</p>`}
