@@ -664,12 +664,13 @@ function evalPerson(p, crit) {
   if (!c) return { s: 'maybe', why: ['Details not read yet'], notes };
   const bmi = bmiOf(p), f1 = (n) => (Math.round(n * 10) / 10).toFixed(1);
   if (c.special && p.healthy !== false) no.push('Needs a specific condition or group (' + c.special + ')');
+  if (c.ow && bmi != null && bmi < 25) no.push('Overweight study (BMI ' + f1(bmi) + ')');
   if (c.sex === 'M' && p.sex === 'F') no.push('Men only');
   if (c.sex === 'F' && p.sex === 'M') no.push('Women only');
   if (c.age && +p.age) { const lo = c.age[0], hi = c.age[1]; if ((lo != null && p.age < lo) || (hi != null && p.age > hi)) no.push('Age ' + p.age + ' is outside ' + lo + (hi != null ? '–' + hi : '+')); }
   else if (!c.age) maybe.push('Age not listed');
   if (c.bmi && bmi != null) { const lo = c.bmi[0], hi = c.bmi[1]; if (lo != null && bmi < lo) no.push('BMI ' + f1(bmi) + ' is under ' + lo); else if (hi != null && bmi > hi) no.push('BMI ' + f1(bmi) + ' is over ' + hi); }
-  else if (!c.bmi) maybe.push('BMI not listed' + (c.ow ? ' (overweight study)' : ''));
+  else if (!c.bmi && !(c.ow && bmi != null && bmi >= 25)) maybe.push('BMI not listed' + (c.ow ? ' (overweight study)' : ''));
   if (c.minWt && +p.wt && p.wt < c.minWt) no.push('Weight is under ' + c.minWt + ' lb');
   if (c.smoker === 'non' && p.smoker) no.push('Non-smokers only');
   if (c.smoker === 'only' && !p.smoker) no.push('Smokers only');
@@ -681,7 +682,7 @@ function evalPerson(p, crit) {
   if (c.meds) notes.push('No prescription medications allowed');
   if (no.length) return { s: 'no', why: no, notes };
   if (maybe.length) return { s: 'maybe', why: maybe, notes };
-  return { s: 'ok', why: ['Fits the age and BMI listed'], notes };
+  return { s: 'ok', why: [c.ow && !c.bmi ? 'Overweight study' : 'Fits the age and BMI listed'], notes };
 }
 
 // ---------- business hours ----------
