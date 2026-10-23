@@ -510,12 +510,12 @@ async function recImport(r,quiet){if(!r||!r.link||(r.ingredients&&r.steps))retur
   if(!x.steps&&j.steps&&j.steps.length)x.steps=j.steps.map((t,i)=>(i+1)+'. '+t).join('\n');
   if(!x.time&&j.time)x.time=j.time;if(!x.servings&&j.servings)x.servings=j.servings;
   if(x.auto&&j.title){x.title=tidyTitle(j.title)||x.title;x.auto=0}
-  delete x.impFail;save();if(!quiet){render();toast('Recipe saved with ingredients and steps.')}return true}catch(e){return fail()}}
+  if(x.ingredients)delete x.impFail;else x.impFail=Date.now();save();if(!quiet){render();toast('Recipe saved with ingredients and steps.')}return true}catch(e){return fail()}}
 let RIA=false;
 async function recImportAll(manual){if(RIA)return;const WK=7*864e5,q=S.recipes.filter(r=>r.link&&!r.ingredients&&(manual||!r.impFail||Date.now()-r.impFail>WK));if(!q.length){if(manual)toast('Every recipe with a link already has its ingredients.');return}
  RIA=true;let ok=0,n=0;toast('Getting ingredients and steps for '+q.length+' recipe'+(q.length===1?'':'s')+'…');
  for(const r of q){n++;if(await recImport(r,true)){ok++;if(ok%4===0&&!redit&&!CK)render()}await new Promise(z=>setTimeout(z,500))}
- RIA=false;render();toast(ok?'Added ingredients and steps to '+ok+' recipe'+(ok===1?'':'s')+'.'+(ok<q.length?' '+(q.length-ok)+' couldn’t be read.':''):'Couldn’t read those recipes. Some sites block it, so you can type them in with the pencil.')}
+ RIA=false;render();if(!manual&&!ok)return;toast(ok?'Added ingredients and steps to '+ok+' recipe'+(ok===1?'':'s')+'.'+(ok<q.length?' '+(q.length-ok)+' couldn’t be read.':''):'Couldn’t read those recipes. Some sites block it, so you can type them in with the pencil.')}
 let CK=null,CKW=null,CKT={};
 const ckSteps=r=>(r.steps||'').split('\n').map(s=>s.replace(/^\s*(step\s*)?\d+[.):]\s*/i,'').trim()).filter(Boolean);
 async function ckWake(on){try{if(on){if('wakeLock' in navigator)CKW=await navigator.wakeLock.request('screen')}else if(CKW){await CKW.release();CKW=null}}catch(_){}}
