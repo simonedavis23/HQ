@@ -957,8 +957,8 @@ function askSubmit(){const i=document.getElementById('askin'),v=(i&&i.value||'')
  askShow(r.msg,r.bad,!r.bad)}
 let AREC=null;function askMic(btn){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){askShow('Voice is not available here. Tap the microphone on your keyboard to dictate instead.',1);return}
  if(AREC){try{AREC.stop()}catch(_){}return}
- const r=new SR();AREC=r;r.lang='en-US';r.interimResults=true;r.continuous=false;btn.classList.add('on');const i=document.getElementById('askin');let fin='';
- r.onresult=e=>{let t='';for(let k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;fin=t;if(i)i.value=t};
+ const r=new SR();AREC=r;r.lang='en-US';r.interimResults=true;r.continuous=false;btn.classList.add('on');askShow('Getting ready…',0,0);r.onstart=()=>askShow('Listening… go ahead and speak.',0,0);const i=document.getElementById('askin');let fin='';
+ r.onaudiostart=()=>askShow('Listening… go ahead and speak.',0,0);r.onresult=e=>{let t='';for(let k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;fin=t;if(i)i.value=t};
  r.onerror=e=>{AREC=null;btn.classList.remove('on');askShow(e.error==='not-allowed'||e.error==='service-not-allowed'?'Voice is blocked here. Tap the microphone on your keyboard to dictate instead.':'I could not hear that. Try again, or use the microphone on your keyboard.',1)};
  r.onend=()=>{AREC=null;btn.classList.remove('on');if(fin&&i&&i.value.trim())askSubmit()};
  try{r.start()}catch(_){AREC=null;btn.classList.remove('on')}}
@@ -972,8 +972,8 @@ document.addEventListener('submit',e=>{if(e.target&&e.target.id==='askf'){e.prev
 var noClk=0;
 const hap=()=>{try{if(navigator.vibrate&&navigator.vibrate(12))return}catch(_){}try{const l=document.getElementById('hap');if(l)l.click()}catch(_){}};
 (function(){const l=document.createElement('label');l.id='hap';l.setAttribute('aria-hidden','true');l.style.cssText='position:fixed;left:0;bottom:0;width:40px;height:24px;opacity:.01;pointer-events:none;z-index:-1';l.innerHTML='<input type="checkbox" switch tabindex="-1">';document.body.appendChild(l);
- document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('button,summary,.tile,.cell,select,.chip,.pill');if(t&&!t.closest('.tiles.dm'))hap()},true);
- document.addEventListener('change',e=>{const t=e.target;if(t&&(t.type==='checkbox'||t.tagName==='SELECT'))hap()},true)})();
+ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('button,summary,.tile,.cell,.chip,.pill');if(t&&!t.closest('.tiles.dm')&&!t.closest('form.edit,select'))hap()},true);
+ document.addEventListener('change',e=>{const t=e.target;if(t&&t.type==='checkbox'&&!t.closest('form.edit'))hap()},true)})();
 (function(){let T=0,sx=0,sy=0,tile=null,grid=null,on=false,tgt=null;
  const cancel=()=>{clearTimeout(T);T=0};
  const under=(x,y)=>{if(!grid)return null;const L=[...grid.querySelectorAll('.tile')];for(const t of L){if(t===tile)continue;const b=t.getBoundingClientRect();if(x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom)return t}return null};
