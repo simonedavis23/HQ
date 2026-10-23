@@ -635,8 +635,8 @@ function iconDraw(){try{const P=PAL(),st=STY(),L=S.look||{},hf=L.hfont||L.font||
  if(st==='glam'){const g=x.createLinearGradient(0,0,512,512);g.addColorStop(0,'#2a201b');g.addColorStop(1,'#0e0a08');x.fillStyle=g;x.fillRect(0,0,512,512);x.strokeStyle=gold;x.lineWidth=6;x.strokeRect(26,26,460,460);fg='#f3dca6'}
  else if(st==='edi'){x.fillStyle='#fffdf9';x.fillRect(0,0,512,512);x.fillStyle=P.t1;x.fillRect(0,0,512,30);x.strokeStyle=gold;x.lineWidth=4;x.strokeRect(34,56,444,422);fg='#2a201b'}
  else{const g=x.createLinearGradient(0,0,512,512);g.addColorStop(0,mixHex(P.t1,'#ffffff',.12));g.addColorStop(1,mixHex(P.t2,'#ffffff',.12));x.fillStyle=g;x.fillRect(0,0,512,512);fg='#fffaf0'}
- const sz=t.length>2?190:230;x.font=`600 ${sz}px '${hf}',Georgia,serif`;x.textAlign='center';x.textBaseline='alphabetic';x.shadowColor='rgba(0,0,0,.22)';x.shadowBlur=st==='edi'?0:18;x.shadowOffsetY=st==='edi'?0:6;x.fillStyle=fg;x.fillText(t,256,300);
- x.shadowColor='transparent';x.fillStyle=gold;x.fillRect(206,350,100,6);return c.toDataURL('image/png')}catch(e){return ''}}
+ const sz=t.length>2?190:230;x.font=`600 ${sz}px '${hf}',Georgia,serif`;x.textAlign='center';x.textBaseline='alphabetic';x.shadowColor='rgba(0,0,0,.22)';x.shadowBlur=st==='edi'?0:18;x.shadowOffsetY=st==='edi'?0:6;x.fillStyle=fg;const m=x.measureText(t),asc=m.actualBoundingBoxAscent||sz*.7,dsc=m.actualBoundingBoxDescent||0,lx=(m.actualBoundingBoxLeft-m.actualBoundingBoxRight)/2,cy=st==='edi'?268:256,by=cy+(asc-dsc)/2;x.fillText(t,256+(isFinite(lx)?lx:0),by);
+ x.shadowColor='transparent';x.fillStyle=gold;x.fillRect(216,by+34,80,5);return c.toDataURL('image/png')}catch(e){return ''}}
 function iconApply(){try{const u=iconDraw();if(!u)return;const l=document.querySelector('link[rel="apple-touch-icon"]');if(l)l.href=u;ICOURL=u}catch(e){}}
 let ICOURL='';
 function applyLook(){const L=S.look||{};let st=document.getElementById('lookcss');if(!st){st=document.createElement('style');st.id='lookcss';document.head.appendChild(st)}
