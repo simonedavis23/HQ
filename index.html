@@ -456,6 +456,7 @@ const legend=()=>`<div class="leg">${CATS.map(c=>`<label><input type="color" cla
 const evForm=s=>{const e=eid?S.events.find(x=>x.id===eid):null,v=e||{};
  return `<form class="edit" data-k="calev" data-d="${s}">${e?'<h3 class="first">Edit Event</h3>':''}<input class="first" name="title" placeholder="Event Or Appointment" aria-label="Event" value="${esc(v.title||'')}" required><label class="lb">Starts<input name="date" type="date" value="${v.date||s}" required></label><label class="lb">Ends (optional)<input name="end" type="date" value="${v.end||''}"></label><label class="lb">Time<input name="time" type="time" value="${v.time||''}"></label><label class="lb">Repeats<select name="rep">${REPS.map(r=>`<option value="${r[0]}"${+(v.rep||0)===r[0]?' selected':''}>${r[1]}</option>`).join('')}</select></label><label class="lb" style="grid-column:1/-1">Choose A Category (Work, Kids, Me…)<select name="cat" style="font-weight:700">${CATS.map(c=>`<option${c[0]===catOf(v)?' selected':''}>${c[0]}</option>`).join('')}</select></label><label class="lb" style="flex-direction:row;gap:8px;align-items:center"><input type="checkbox" name="task"${v.task?' checked':''} style="width:20px;height:20px"> Also Show In Tasks When Due</label><input class="first" name="note" placeholder="Note (Optional)" aria-label="Note" value="${esc(v.note||'')}"><button class="btn">${e?'Save changes':'Add event'}</button><button type="button" class="btn ghost" data-a="ecancel">Cancel</button></form>`};
 function vEvents(){
+ if(eid&&S.events.find(x=>x.id===eid))return panel('Edit Event',evForm(csel()));
  const s=csel(),t=today(),f=new Date(s.slice(0,8)+'01T12:00'),lead=f.getDay(),n=new Date(f.getFullYear(),f.getMonth()+1,0).getDate();
  const byT=(a,b)=>(a.time||'').localeCompare(b.time||'');
  let c='';for(let i=0;i<lead;i++)c+='<em></em>';
@@ -763,7 +764,7 @@ document.addEventListener('click',e=>{
  else if(a==='pick')md=i?i:b.dataset.d;
  else if(a==='rg')rgrp=b.dataset.v;else if(a==='mv')mv=b.dataset.v;else if(a==='gt2')gtab=b.dataset.v;else if(a==='wbuy'){const w=find('wishes',i);if(w){S.groceries.push({id:uid(),title:cap(w.title),qty:''});S.wishes=S.wishes.filter(x=>x.id!==i);msg=''}}else if(a==='mt'){mtab=b.dataset.v;radd=false}
  else if(a==='cpick'){cd=b.dataset.d;eid=''}
- else if(a==='eedit'){eid=b.dataset.i;setTimeout(()=>{const f=document.querySelector('form[data-k="calev"]');if(f)f.scrollIntoView({block:'center'})},0)}
+ else if(a==='eedit'){eid=b.dataset.i;setTimeout(()=>window.scrollTo(0,0),0)}
  else if(a==='ecancel')eid='';
  else if(a==='ctoday')cd='';
  else if(a==='autofill')autoFill();
