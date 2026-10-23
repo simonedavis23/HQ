@@ -250,6 +250,8 @@ p.m,.czn{font-size:13.5px;line-height:1.55;color:#7a6a60;letter-spacing:.003em}
 .czn{border-left:2px solid rgba(201,162,92,.55);padding-left:10px;margin-left:2px}
 details.bbset>p.m,details.hdet>p.m{font-size:13.5px}
 @media (prefers-color-scheme:dark){.tip{color:#d9c9b8}.tip svg{color:#d9b46b}p.m,.czn{color:#b3a395}}
+#ttl.ttlh{cursor:pointer;display:inline-flex;align-items:center;gap:8px;-webkit-tap-highlight-color:transparent}#ttl.ttlh::after{content:'';width:10px;height:10px;flex:none;background:no-repeat center/10px 6px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='%23777' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E");opacity:.4;margin-top:6px}
+#hubm{position:fixed;inset:0;z-index:92}.hubmb{position:absolute;inset:0}.hubmm{position:absolute;min-width:190px;max-width:80vw;background:var(--card,#fff);border:1px solid var(--line,rgba(110,70,55,.2));border-radius:14px;box-shadow:0 10px 30px rgba(60,40,30,.22);padding:6px;display:flex;flex-direction:column}.hubmm .hmi{text-align:left;padding:10px 12px;border:0;background:none;font:inherit;border-radius:9px;color:inherit;cursor:pointer}.hubmm .hmi.on{background:rgba(181,112,124,.14);font-weight:700}.hubmm .hmi.add{color:var(--mut);font-size:13px}
 </style>
 </head>
 <body>
@@ -1081,7 +1083,7 @@ const HKIND={checklist:'Checklist',list:'List',notes:'Notes',baby:'Tracker',weig
 ICO['studies']='<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/><path d="M7.5 15h9"/>';ICO['k:checklist']='<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12l3 3 5-6"/>';ICO['k:list']='<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>';ICO['k:baby']='<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>';ICO['k:weight']='<path d="M5 8h14l2 12H3L5 8z"/><path d="M9 8a3 3 0 0 1 6 0M12 12l2-2"/>';ICO['k:food']='<path d="M7 3v8a2 2 0 0 0 2 2v8M11 3v8M7 7h4M17 3c-2 2-2 6 0 8v10"/>';ICO['k:notes']='<path d="M6 3h9l4 4v14H6V3z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>';
 const hubs=()=>(S.hubs=S.hubs||[]),hubOf=id=>hubs().find(h=>h.id===id),hUid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-3);
 function hubList(){const o=S.hubOrder||[],all=[{id:'today',name:homeName()}].concat(hubs().map(h=>({id:h.id,name:h.name})));const ix=x=>{const i=o.indexOf(x.id);return i<0?1000+all.indexOf(x):i};return all.slice().sort((a,b)=>ix(a)-ix(b))}
-const hChips=cur=>{const nm=cur==='today'?homeName():((hubOf(cur.split(':')[1])||{}).name||homeName());return `<details class="hsw" data-od="hsw"><summary>${esc(nm)} <span aria-hidden="true">▾</span></summary><div class="hmenu">${hubList().map(x=>`<button type="button" class="hmi${cur===(x.id==='today'?'today':'h:'+x.id)?' on':''}" data-tab="${x.id==='today'?'today':'h:'+x.id}">${esc(x.name)}</button>`).join('')}<button type="button" class="hmi add" data-tab="hubnew">+ Add A Hub</button><button type="button" class="hmi add" data-tab="hubord">Arrange Hubs</button></div></details>`};
+const hChips=cur=>'';
 const hInfo=g=>{const n=(g.items||[]).length;return g.kind==='weight'?fitInfoW():g.kind==='food'?fitInfoF():g.kind==='baby'?babyInfo():g.kind==='checklist'?(g.items||[]).filter(x=>!x.done).length+' open':g.kind==='notes'?((g.text||'').trim()?'Written':'Empty'):n+(n===1?' item':' items')};
 // ---------- Baby Log: shared tracker ----------
 let BL={rows:[],kids:[],loaded:false,busy:false,sheet:null,msg:'',child:null,days:2,sig:''};
@@ -1202,7 +1204,7 @@ document.addEventListener('submit',e=>{const f=e.target.closest&&e.target.closes
 let HSV=null;document.addEventListener('input',e=>{const i=e.target;if(!i.dataset||!i.dataset.hi)return;const h=hubOf(i.dataset.hid),g=h&&(h.pages||[]).find(z=>z.id===i.dataset.pid);const k=i.dataset.hi;if(k==='hname'&&h)h.name=i.value.slice(0,24);else if(k==='pname'&&g)g.name=i.value.slice(0,28);else if(k==='notes'&&g)g.text=i.value;else return;clearTimeout(HSV);HSV=setTimeout(save,500)});
 function render(){
  const HB=hubView(tab),T=HB?[tab,HB.title,HB.color,'']:TBS().find(x=>x[0]===tab);
- const isH=tab==='today'||!!(HB&&HB.home);document.body.classList.toggle('home',isH);document.getElementById('ttl').textContent=tab==='today'?homeName():T[1];
+ const isH=tab==='today'||!!(HB&&HB.home);document.body.classList.toggle('home',isH);document.getElementById('ttl').textContent=tab==='today'?homeName():T[1];document.getElementById('ttl').classList.toggle('ttlh',isH);hmClose();
  document.getElementById('sub').innerHTML=esc(new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}))+(tab==='today'?`<span class="hwx" id="wx" aria-label="Weather">${wxHtml()}</span>`:'');
  const par=isH?'':HB?HB.parent:tab.startsWith('g:')?'today':(lay().in[tab]?'g:'+lay().in[tab]:'today'),pt=par&&par!=='today'?TBS().find(x=>x[0]===par):null;
  document.getElementById('nav').className=isH?'':'hasback';document.getElementById('nav').innerHTML=(isH?'':`<button class="back" data-tab="${par}" aria-label="Back to ${esc(pt?pt[1]:homeName())}"><span aria-hidden="true">←</span> Back</button>`);
@@ -1690,6 +1692,12 @@ function muOpen(){muClose();const A=QAAPPS.slice(0,5),d=S.musicApp&&A.find(a=>a[
 function muClose(){const o=document.getElementById('mush');if(o)o.remove()}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-mu],#musicbtn');if(!b)return;if(b.id==='musicbtn'){muOpen();return}const a=b.dataset.mu;if(a==='close'){muClose();return}if(a==='open'){location.href=b.dataset.u;muClose();return}if(a==='def'){S.musicApp=b.dataset.n;save();muOpen()}});
 (function(){const b=document.createElement('button');b.id='musicbtn';b.type='button';b.setAttribute('aria-label','Play Music');b.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>';document.body.appendChild(b)})();
+
+// ---------- Title as hub menu ----------
+function hmClose(){const o=document.getElementById('hubm');if(o)o.remove()}
+function hmOpen(){if(document.getElementById('hubm')){hmClose();return}const cur=tab==='today'?'today':tab,t=document.getElementById('ttl').getBoundingClientRect(),o=document.createElement('div');o.id='hubm';
+ o.innerHTML=`<div class="hubmb" data-hm="x"></div><div class="hubmm" style="top:${Math.round(t.bottom+6)}px;left:${Math.max(12,Math.round(t.left))}px">${hubList().map(x=>`<button type="button" class="hmi${cur===(x.id==='today'?'today':'h:'+x.id)?' on':''}" data-tab="${x.id==='today'?'today':'h:'+x.id}">${esc(x.name)}</button>`).join('')}<button type="button" class="hmi add" data-tab="hubnew">+ Add A Hub</button><button type="button" class="hmi add" data-tab="hubord">Arrange Hubs</button></div>`;document.body.appendChild(o)}
+document.addEventListener('click',e=>{const t=e.target;if(t&&t.id==='ttl'&&t.classList.contains('ttlh')){hmOpen();return}if(t&&t.closest&&t.closest('#hubm')){setTimeout(hmClose,0)}});
 
 try{if(window.__demo){var db=document.createElement('div');db.id='demobar';db.innerHTML='Practice Copy · Your real binder is untouched · <a href="?new=reset">Start Over</a>';document.body.appendChild(db)}}catch(e){}
 try{onbCheck()}catch(e){}
