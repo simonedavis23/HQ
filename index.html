@@ -346,7 +346,7 @@ details.strow[open]>.grid{grid-template-columns:1fr 1fr!important;gap:8px 10px!i
 <nav id="nav" aria-label="Binder sections"></nav>
 <div id="view"></div>
 </main>
-<script>if(/[?&]new(=|&|$)/.test(location.search)){(function(){var P='demo.',g=Storage.prototype.getItem,st=Storage.prototype.setItem,r=Storage.prototype.removeItem;if(/new=reset/.test(location.search)){Object.keys(localStorage).filter(function(k){return k.indexOf(P)===0}).forEach(function(k){r.call(localStorage,k)})}Storage.prototype.getItem=function(k){return g.call(this,P+k)};Storage.prototype.setItem=function(k,v){return st.call(this,P+k,v)};Storage.prototype.removeItem=function(k){return r.call(this,P+k)};window.__demo=1;st.call(localStorage,P+'hq.guest','1')})()}</script><script>
+<script>window.WKP=new Set();if(/[?&]new(=|&|$)/.test(location.search)){(function(){var P='demo.',g=Storage.prototype.getItem,st=Storage.prototype.setItem,r=Storage.prototype.removeItem;if(/new=reset/.test(location.search)){Object.keys(localStorage).filter(function(k){return k.indexOf(P)===0}).forEach(function(k){r.call(localStorage,k)})}Storage.prototype.getItem=function(k){return g.call(this,P+k)};Storage.prototype.setItem=function(k,v){return st.call(this,P+k,v)};Storage.prototype.removeItem=function(k){return r.call(this,P+k)};window.__demo=1;st.call(localStorage,P+'hq.guest','1')})()}</script><script>
 const K='homebinder.v1';
 const AREAS=['Kitchen','Bathrooms','Bedrooms','Living areas','Garage','Outdoors','Whole house'];
 const AISLES=['Produce','Dairy & eggs','Meat & fish','Pantry','Frozen','Household','Other'];
@@ -1085,16 +1085,16 @@ function wkCards(dates,t,c){
 const dinSel=(d,din)=>din?`<span class="dsw"><span class="dsv">${esc(din)} <i>▾</i></span>${dinSel0(d,din)}</span>`:dinSel0(d,din);
  const fork='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v8a2 2 0 0 0 2 2v8M10 3v6a2 2 0 0 1-2 2M17 21V3c-2 2-3 5-3 8h3"/></svg>';
  return dates.map(d=>{const n=new Date(d+'T12:00').toLocaleDateString(undefined,{weekday:'long'});
-  const hl=holItems(d),bl=S.bills.filter(x=>!x.done&&x.due===d),evs=evOn(d).concat(hl.filter(x=>x.cat!=='Bills'&&x.cat!=='Other')).sort(byT),rem=hl.filter(x=>x.cat==='Other'),tk=S.tasks.filter(x=>x.due===d).sort((a,b)=>(a.done?1:0)-(b.done?1:0)),din=((S.plan[d]||{}).Dinner||'').trim();
+  const hl=holItems(d),bl=S.bills.filter(x=>(!x.done&&x.due===d)||(WKP.has(String(x.id))&&((x.done&&x.due===d)||x.prev===d))),evs=evOn(d).concat(hl.filter(x=>x.cat!=='Bills'&&x.cat!=='Other')).sort(byT),rem=hl.filter(x=>x.cat==='Other'),tk=S.tasks.filter(x=>x.due===d).sort((a,b)=>(a.done?1:0)-(b.done?1:0)),din=((S.plan[d]||{}).Dinner||'').trim();
   c.nE+=evs.filter(x=>!(x.date&&x.date<d)).length;c.nB+=bl.length;c.nT+=tk.filter(x=>!x.done).length;
   const R=[];
   evs.forEach(x=>R.push(`<div class="wr"><i class="wb" style="background:${ecol(x)}"></i><div class="wt">${esc(x.title)}${x.end&&x.end>x.date?` <span class="wm">through ${esc(short(x.end))}</span>`:''}</div><span class="wm">${x.date&&x.date<d?'Continues':x.time?esc(tf(x.time)):x.hol?'':'All Day'}</span></div>`));
-  bl.forEach(x=>R.push(`<div class="wr"><i class="wb" style="background:${ccol('Bills')}"></i><div class="wt">${esc(x.title)}<span class="wm"> · Bill${x.amount?' · '+esc(money(x.amount)):''}</span></div><button type="button" class="wpd" data-a="bpaid" data-i="${x.id}">Mark Paid</button></div>`));
+  bl.forEach(x=>{const pd=WKP.has(String(x.id))&&(x.done||x.prev===d);R.push(`<div class="wr${pd?' wpdn':''}"><i class="wb" style="background:${ccol('Bills')}"></i><div class="wt">${esc(x.title)}<span class="wm"> · Bill${x.amount?' · '+esc(money(x.amount)):''}</span></div>${pd?`<button type="button" class="wpd pd" data-a="wbun" data-i="${x.id}" aria-label="Paid. Tap to undo">✓ Paid · Undo</button>`:`<button type="button" class="wpd" data-a="bpaid" data-i="${x.id}">Mark Paid</button>`}</div>`)});
   rem.forEach(x=>R.push(`<div class="wr"><i class="wb" style="background:var(--mut);opacity:.5"></i><div class="wt">${esc(x.title)}</div><span class="wm">Reminder</span></div>`));
   tk.forEach(x=>R.push(`<div class="wr ${x.done?'done':''}"><input type="checkbox" ${x.done?'checked':''} data-a="tt" data-i="${x.id}" aria-label="Complete ${esc(x.title)}"><div class="wt">${esc(x.title)}</div><span class="wm">Task</span></div>`));
   const rc=recOn(d),sd=rc?sideFor(rc,d):null;
   R.push(`<div class="wr wdin"><span class="wfk">${fork}</span><div class="wt"><span class="wm">Dinner</span></div>${dinSel(d,din)}</div>`+(rc&&rc.meal!=='Side'?`<div class="wsd"><button type="button" class="sdchip" data-sd="${d}">${sideTxt(rc,d)} ▾</button></div>`:''));
-  const emp=!evs.length&&!bl.length&&!rem.length&&!tk.length&&!din;return `<div class="wd${d===t?' tdy':''}${emp?' wempty':''}" id="d-${d}"><div class="wdh"><span class="wnum">${+d.slice(8)}</span><div><b class="wnm">${n}</b><span class="wm">${d===t?'Today':d===addD(t,1)?'Tomorrow':esc(short(d))}</span></div></div>${R.join('')}<div class="dta"><details class="dtadd"><summary>+ Event</summary><form data-k="calev" data-d="${d}"><input type="hidden" name="date" value="${d}"><input name="title" placeholder="Event Name" aria-label="Event for ${n}" required autocomplete="off"><input name="time" type="time" aria-label="Time" style="max-width:112px"><button class="btn">Add</button></form></details><details class="dtadd"><summary>+ Task</summary><form data-k="daytask" data-d="${d}"><input name="title" placeholder="Add A Task" aria-label="Add task for ${n}" required autocomplete="off"><button class="btn">Add</button></form></details></div></div>`}).join('');
+  const emp=!evs.length&&!bl.length&&!rem.length&&!tk.length&&!din;return `<div class="wd${d===t?' tdy':''}${emp?' wempty':''}" id="d-${d}"><div class="wdh"><span class="wnum">${+d.slice(8)}</span><div><b class="wnm">${n}</b><span class="wm">${d===t?'Today':d===addD(t,1)?'Tomorrow':esc(short(d))}</span></div></div>${R.join('')}<div class="dta"><span class="dtm"><button type="button" data-dto="calev">Add Event</button><button type="button" data-dto="daytask">Add Task</button></span><button type="button" class="dtplus" data-dtp="1" aria-label="Add Event Or Task" aria-expanded="false">+</button><details class="dtadd"><summary>+ Event</summary><form data-k="calev" data-d="${d}"><input type="hidden" name="date" value="${d}"><input name="title" placeholder="Event Name" aria-label="Event for ${n}" required autocomplete="off"><input name="time" type="time" aria-label="Time" style="max-width:112px"><button class="btn">Add</button></form></details><details class="dtadd"><summary>+ Task</summary><form data-k="daytask" data-d="${d}"><input name="title" placeholder="Add A Task" aria-label="Add task for ${n}" required autocomplete="off"><button class="btn">Add</button></form></details></div></div>`}).join('');
 }
 function vWeek(){
  const t=today(),st=addD(t,7*wk);
@@ -1419,7 +1419,8 @@ document.addEventListener('click',e=>{
  else if(a==='redeem'){const r=(S.rewards||[]).find(z=>z.id===i),w=b.dataset.v;if(r&&starsOf(w)>=r.cost){S.stars.push({id:uid(),who:w,pts:-r.cost,d:today(),r:r.title});toast(w+' redeemed '+r.title+'!')}}
  else if(a==='cclear')S.chores.forEach(x=>{x.done=false});
  else if(a==='bsave'){const d=b.closest('details');if(d){WOPEN.delete(d.dataset.od);d.open=false}toast('Saved')}
- else if(a==='bpaid'){const x=find('bills',i);if(x.repeat!=='Once'&&x.due){x.prev=x.due;x.due=bump(x.due,x.repeat)}else x.done=!x.done}
+ else if(a==='wbun'){const x=find('bills',i);if(x){WKP.delete(String(i));if(x.repeat!=='Once'&&x.prev){x.due=x.prev;delete x.prev}else x.done=false}}
+ else if(a==='bpaid'){const x=find('bills',i);if(x.repeat!=='Once'&&x.due){x.prev=x.due;x.due=bump(x.due,x.repeat);WKP.add(String(i))}else{x.done=!x.done;if(x.done)WKP.add(String(i));else WKP.delete(String(i))}}
  else if(a==='bundo'){const x=find('bills',i);if(x&&x.prev){x.due=x.prev;delete x.prev}}
  else if(a==='mdone'){const x=find('maint',i),m={Monthly:1,Quarterly:3,'Twice a year':6,Yearly:12}[x.every];if(m){const b=new Date(((x.due&&x.due>today())?x.due:today())+'T12:00');b.setMonth(b.getMonth()+m);x.last=today();x.due=iso(b)}else x.done=!x.done}
  else if(a==='timgx'){const o=S.tabs[b.dataset.t];if(o)delete o.img}
@@ -2190,9 +2191,9 @@ body.home #ttl{font-size:25px!important}#ttl .lg{width:32px;height:32px;margin-r
   var o=dlg('sdd','');o.style.zIndex=200;
   function draw(){var extra=cur.filter(function(n){return !L.some(function(x){return x[0]===n})});
    var opts=L.map(function(x){return x[0]}).concat(extra);
-   o.querySelector('.stdlgb').innerHTML='<b style="font-size:17px">Sides For '+esc(rc.title)+'</b><p class="m" style="margin:2px 0 8px">'+esc(fmt(d))+' · Pick As Many As You Like</p>'+opts.map(function(n){var on=cur.indexOf(n)>-1;return '<button type="button" class="btn sdopt'+(on?'':' ghost')+'" data-sv="'+esc(n)+'" aria-pressed="'+on+'">'+esc(cap(n))+(on?'  ✓':'')+'</button>'}).join('')+'<button type="button" class="btn sdopt'+(cur.length?' ghost':'')+'" data-sv="__n">No Side'+(cur.length?'':'  ✓')+'</button><div style="display:flex;gap:8px;margin-top:6px"><input id="sdcustom" placeholder="Something Else" aria-label="Another side" style="flex:1"><button type="button" class="btn ghost" data-sv="__c">Add</button></div><button type="button" class="btn sdopt" style="margin-top:10px" data-sv="__d">Done</button><div style="text-align:center"><button type="button" class="lnk" style="margin-top:6px" data-sv="__x">Cancel</button></div>'}
+   o.querySelector('.stdlgb').innerHTML='<button type="button" class="sdx" data-sv="__d" aria-label="Close" style="float:right;border:0;background:none;font-size:20px;color:var(--mut);padding:0 4px;cursor:pointer">✕</button><b style="font-size:17px">Sides For '+esc(rc.title)+'</b><p class="m" style="margin:2px 0 8px">'+esc(fmt(d))+' · Pick As Many As You Like</p>'+opts.map(function(n){var on=cur.indexOf(n)>-1;return '<button type="button" class="btn sdopt'+(on?'':' ghost')+'" data-sv="'+esc(n)+'" aria-pressed="'+on+'">'+esc(cap(n))+(on?'  ✓':'')+'</button>'}).join('')+'<button type="button" class="btn sdopt'+(cur.length?' ghost':'')+'" data-sv="__n">No Side'+(cur.length?'':'  ✓')+'</button><div style="display:flex;gap:8px;margin-top:6px"><input id="sdcustom" placeholder="Something Else" aria-label="Another side" style="flex:1"><button type="button" class="btn ghost" data-sv="__c">Add</button></div><button type="button" class="btn sdopt" style="margin-top:10px" data-sv="__d">Done</button>'}
   draw();
-  o.addEventListener('click',function(e){var b=e.target.closest('[data-sv]');if(!b&&e.target!==o)return;var v=b?b.getAttribute('data-sv'):'__x';
+  o.addEventListener('click',function(e){var b=e.target.closest('[data-sv]');if(!b&&e.target!==o)return;var v=b?b.getAttribute('data-sv'):'__d';
    if(v==='__x'){o.remove();return}
    if(v==='__d'){o.remove();sideSet(d,cur);render();if(cb)cb();return}
    if(v==='__n'){cur=[];draw();return}
@@ -2414,6 +2415,14 @@ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.c
 <script>(function(){const _r=render;render=function(){const r=_r.apply(this,arguments);try{if(typeof SBS!=='undefined'&&SBS&&!CS.key&&!CS.busy&&!CS.tried&&tab==='events'&&WOPEN.has('calsync')){CS.tried=1;csKey()}}catch(_){}return r}})();</script>
 <script>document.addEventListener('toggle',function(e){try{var d=e.target;if(d&&d.dataset&&d.dataset.od==='calsync'&&d.open&&typeof SBS!=='undefined'&&SBS&&!CS.key&&!CS.busy){csKey()}}catch(_){}},true);</script>
 <style id="luxe">
+.wpd.pd{background:rgba(46,125,79,.12);color:#2e7d4f!important;border-color:rgba(46,125,79,.55)!important}.wpdn .wt{opacity:.55}.wpdn .wt{text-decoration:line-through}
+.dta{justify-content:flex-end!important;align-items:center;gap:8px!important;margin-top:4px}
+.dtadd>summary{display:none!important}.dtadd{margin:0!important;order:3}.dtadd[open]{flex-basis:100%}
+.dtplus{order:2;width:34px;height:34px;border-radius:50%;border:0;background:var(--a);color:#fff;font:400 24px/1 Figtree,sans-serif;padding:0 0 2px;cursor:pointer;box-shadow:0 3px 9px rgba(120,70,70,.25);transition:transform .2s}
+.dta.mo .dtplus{transform:rotate(45deg)}
+.dtm{order:1;display:none;gap:8px}.dta.mo .dtm{display:flex}
+.dtm button{border:1.5px solid color-mix(in srgb,var(--a) 55%,transparent);background:transparent;color:var(--a);border-radius:999px;padding:7px 14px;font:600 13.5px Figtree,sans-serif;cursor:pointer}
+.dsw .dsv{white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal!important}
 .tevw{display:flex;align-items:center;gap:6px;min-width:0}.tevw .tev{flex:1 1 auto;min-width:0;width:auto!important}
 .tevw .tevk{flex:0 0 20px;width:20px;height:20px;margin:0;accent-color:#9a8266}
 .tevw .tevx{flex:0 0 34px;height:34px;border:0;background:none;color:#a89088;font-size:15px;border-radius:10px;padding:0}
@@ -2487,5 +2496,14 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
 #tmpop .tev{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;padding:10px 4px;border:0;border-top:1px solid #efe3df;background:none;font:inherit;color:#3d2c28}
 #tmpop .tevt{min-width:62px;font-weight:700;color:#7a5a52;font-size:14px}#tmpop .tevn{flex:1;min-width:0;overflow-wrap:anywhere}
 .tmore{display:block;margin-top:4px;padding:2px 8px;border-radius:999px;border:1px solid #d9bfb8;background:#fff;color:#7a4f48;font-size:11px;font-weight:700;white-space:nowrap}</style>
+<script>(function(){
+function fit(){document.querySelectorAll('.dsw .dsv').forEach(function(e){e.style.fontSize='';e.style.removeProperty('white-space');e.style.removeProperty('overflow');var z=17;while(e.scrollWidth>e.clientWidth+1&&z>12){z-=.5;e.style.fontSize=z+'px'}if(e.scrollWidth>e.clientWidth+1){e.style.fontSize='14px';e.style.setProperty('white-space','normal','important');e.style.setProperty('overflow','visible','important');e.style.setProperty('overflow-wrap','anywhere','important')}})}
+var _r=render;render=function(){_r.apply(this,arguments);requestAnimationFrame(fit)};
+window.addEventListener('resize',fit);try{document.fonts.ready.then(fit)}catch(e){}
+document.addEventListener('change',function(){setTimeout(fit,50)},true);
+requestAnimationFrame(fit)})()</script>
+<script>(function(){document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-dtp]');if(p){var d=p.closest('.dta'),on=!d.classList.contains('mo');d.classList.toggle('mo',on);p.setAttribute('aria-expanded',on);if(!on)d.querySelectorAll('details[open]').forEach(function(x){x.open=false});return}
+var o=e.target.closest&&e.target.closest('[data-dto]');if(o){var d2=o.closest('.dta');d2.classList.remove('mo');d2.querySelectorAll('details').forEach(function(x){var m=x.querySelector('form[data-k="'+o.getAttribute('data-dto')+'"]');x.open=!!m;if(m){var i=m.querySelector('input[name=title]');if(i)setTimeout(function(){i.focus()},50)}})}})})()</script>
+<script>(function(){var _r=render;render=function(){if(tab!=='week')WKP.clear();_r.apply(this,arguments)}})()</script>
 <script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script></body>
 </html>
