@@ -532,7 +532,7 @@ let TDMORE=false;
 function todayCard(){const t=today(),din=(S.plan[t]||{}).Dinner,tk=S.tasks.filter(x=>!x.done&&x.due&&x.due<=t),ed=evDue(),ev=holItems(t).filter(x=>x.cat!=='Bills').concat(evOn(t)).filter(x=>!(x.end&&x.end>x.date&&t>x.date&&t<x.end)),bd=S.bills.filter(x=>!x.done&&x.due===t),od=S.bills.filter(x=>!x.done&&x.due&&x.due<t).length,T=nextTrip(t);
  const L=[];
  L.push(`<div class="trow"><span class="m">Dinner</span><b>${din?esc(din):'Not Planned Yet'}${(()=>{const sd=sideFor(recOn(t),t);const rc0=recOn(t);return rc0&&rc0.meal!=='Side'?` <button type="button" class="sdchip" data-sd="${t}">${sd?'Side: '+esc(sd[0]):'No Side'} ▾</button>`:''})()}</b></div>`);
- if(ev.length)L.push(`<div class="trow"><span class="m">Events</span><span>${ev.slice(0,4).map(x=>esc(x.end&&x.end>x.date&&x.end===t?'Ends today: '+x.title:x.title)).join(', ')}</span></div>`);
+ if(ev.length)L.push(`<div class="trow"><span class="m">Events</span><div class="tevs">${ev.slice(0,4).map(x=>{const lab=esc(x.end&&x.end>x.date&&x.end===t?'Ends today: '+x.title:x.title),tm=(x.time&&!(x.end&&x.end>x.date))?`<span class="tevt">${esc(tf(x.time))}</span>`:'';return `<button type="button" class="tev" data-a="tevopen" data-i="${x.hol?'':esc(String(x.id||''))}">${tm}<span class="tevn">${lab}</span><span class="tevc">›</span></button>`}).join('')}${ev.length>4?`<span class="m">+${ev.length-4} more</span>`:''}</div></div>`);
  {const sk=(S.skipd&&S.skipd.d===t?S.skipd.k:[]),pd=S.pday==null?0:+S.pday,I=[];
   const isPlan=new Date(t+'T12:00').getDay()===pd&&!sk.includes('plan'),isShop=T===t&&!sk.includes('shop'),shopDone=S.shopDone===t;
   const nt=`<button class="lnk tnot" data-a="tnot" data-k="`;
@@ -1391,6 +1391,7 @@ document.addEventListener('click',e=>{
  else if(a==='rg')rgrp=b.dataset.v;else if(a==='mv')mv=b.dataset.v;else if(a==='gt2')gtab=b.dataset.v;else if(a==='wbuy'){const w=find('wishes',i);if(w){S.groceries.push({id:uid(),title:cap(w.title),qty:''});S.wishes=S.wishes.filter(x=>x.id!==i);msg=''}}else if(a==='mt'){mtab=b.dataset.v;radd=false}
  else if(a==='cpick'){cd=b.dataset.d;eid=''}
  else if(a==='eedit'){eid=b.dataset.i;setTimeout(()=>window.scrollTo(0,0),0)}
+ else if(a==='tevopen'){window.__evFT=!!(b.dataset.i);cd=today();eid=b.dataset.i&&S.events.some(z=>String(z.id)===b.dataset.i)?b.dataset.i:'';tab='events';setTimeout(()=>window.scrollTo(0,0),0)}
  else if(a==='ecancel')eid='';
  else if(a==='ctoday')cd='';
  else if(a==='autofill')autoFill();
@@ -2399,7 +2400,9 @@ try{onbCheck()}catch(e){}
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-cpf]');if(!b)return;e.preventDefault();e.stopPropagation();var k=b.dataset.cpf;S.calpref=S.calpref||{};var cur=k==='events'?S.calpref.events!==false:S.calpref[k]===true;S.calpref[k]=!cur;save();WOPEN.add('calsync');render();toast('Saved. Your phone updates within the hour.')},true);
 </script>
 <script>setTimeout(function(){try{if(S&&S.events&&!S.ccatv){S.ccatv=1;save()}}catch(e){}},3000);</script>
+<script>(function(){const _r=render;let busy=false;render=function(){const r=_r.apply(this,arguments);try{if(window.__evFT&&!busy){if(tab!=='events'){window.__evFT=false}else if(!eid){window.__evFT=false;busy=true;tab='today';try{_r()}finally{busy=false}}}}catch(_){busy=false}return r}})();</script>
 <style id="luxe">
+.tevs{display:flex;flex-direction:column;gap:2px;min-width:0}.tev{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:5px 0;text-align:left;cursor:pointer;font:inherit;color:var(--ink);min-height:34px}.tev .tevt{flex:none;font-weight:700;color:var(--at);font-variant-numeric:tabular-nums;min-width:62px}.tev .tevn{flex:1;min-width:0}.tev .tevc{flex:none;color:var(--mut);font-size:20px}
 .cfl{text-decoration:none}.cfl u{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:10px;vertical-align:-1px}.cfl em{font-style:normal;font-weight:700;color:var(--at)}
 
 .cpl{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card);margin-top:6px}.cpt{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:12px 14px;background:none;border:0;border-top:1px solid var(--line);text-align:left;cursor:pointer;font:inherit;color:var(--ink)}.cpt:first-child{border-top:0}.cpt b{display:block;font-size:15px;font-weight:600}.cpt small{display:block;color:var(--mut);font-size:13px;margin-top:1px}.cpt i{flex:none;position:relative;width:46px;height:28px;border-radius:999px;background:#cfc3bb;transition:background .2s}.cpt i::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}.cpt i.on{background:var(--a)}.cpt i.on::after{transform:translateX(18px)}
