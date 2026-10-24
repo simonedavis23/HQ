@@ -532,7 +532,7 @@ let TDMORE=false;
 function todayCard(){const t=today(),din=(S.plan[t]||{}).Dinner,tk=S.tasks.filter(x=>!x.done&&x.due&&x.due<=t),ed=evDue(),ev=holItems(t).filter(x=>x.cat!=='Bills').concat(evOn(t)).filter(x=>!(x.end&&x.end>x.date&&t>x.date&&t<x.end)),bd=S.bills.filter(x=>!x.done&&x.due===t),od=S.bills.filter(x=>!x.done&&x.due&&x.due<t).length,T=nextTrip(t);
  const L=[];
  L.push(`<div class="trow"><span class="m">Dinner</span><b>${din?esc(din):'Not Planned Yet'}${(()=>{const sd=sideFor(recOn(t),t);const rc0=recOn(t);return rc0&&rc0.meal!=='Side'?` <button type="button" class="sdchip" data-sd="${t}">${sd?'Side: '+esc(sd[0]):'No Side'} ▾</button>`:''})()}</b></div>`);
- if(ev.length)L.push(`<div class="trow"><span class="m">Events</span><div class="tevs">${ev.slice().sort((p,q)=>{const a1=(p.time&&!(p.end&&p.end>p.date))?p.time:'',b1=(q.time&&!(q.end&&q.end>q.date))?q.time:'';return a1===b1?0:!a1?-1:!b1?1:a1.localeCompare(b1)}).slice(0,ev.length<=5?ev.length:4).map(x=>{const lab=esc(x.end&&x.end>x.date&&x.end===t?'Ends today: '+x.title:x.title),tm=(x.time&&!(x.end&&x.end>x.date))?`<span class="tevt">${esc(tf(x.time))}</span>`:`<span class="tevt ad">All Day</span>`;return `<button type="button" class="tev" data-a="tevopen" data-i="${x.hol?'':esc(String(x.id||''))}">${tm}<span class="tevn">${lab}</span><span class="tevc">›</span></button>`}).join('')}${ev.length>5?`<button type="button" class="lnk" data-tab="events" style="text-align:left;padding:4px 0">+${ev.length-4} More</button>`:''}</div></div>`);
+ if(ev.length)L.push(`<div class="trow"><span class="m">Events${ev.length>4?`<button type="button" class="tmore" data-tmore="1">+${ev.length-4} More</button>`:''}</span><div class="tevs">${ev.slice().sort((p,q)=>{const a1=(p.time&&!(p.end&&p.end>p.date))?p.time:'',b1=(q.time&&!(q.end&&q.end>q.date))?q.time:'';return a1===b1?0:!a1?-1:!b1?1:a1.localeCompare(b1)}).slice(0,4).map(x=>{const lab=esc(x.end&&x.end>x.date&&x.end===t?'Ends today: '+x.title:x.title),tm=(x.time&&!(x.end&&x.end>x.date))?`<span class="tevt">${esc(tf(x.time))}</span>`:`<span class="tevt ad">All Day</span>`;return `<button type="button" class="tev" data-a="tevopen" data-i="${x.hol?'':esc(String(x.id||''))}">${tm}<span class="tevn">${lab}</span><span class="tevc">›</span></button>`}).join('')}</div></div>`);
  {const sk=(S.skipd&&S.skipd.d===t?S.skipd.k:[]),pd=S.pday==null?0:+S.pday,I=[];
   const isPlan=new Date(t+'T12:00').getDay()===pd&&!sk.includes('plan'),isShop=T===t&&!sk.includes('shop'),shopDone=S.shopDone===t;
   const nt=`<button class="lnk tnot" data-a="tnot" data-k="`;
@@ -2454,5 +2454,24 @@ details.rec[data-od^="k:"][open]>summary::after,details.rec[data-od^="ct:"][open
 #rsrch,input[aria-label="Search recipes"]{min-width:0!important}
 
 </style>
+<script>(function(){
+function srt(ev){return ev.slice().sort((p,q)=>{const a=(p.time&&!(p.end&&p.end>p.date))?p.time:'',b=(q.time&&!(q.end&&q.end>q.date))?q.time:'';return a===b?0:!a?-1:!b?1:a.localeCompare(b)})}
+function close(){const o=document.getElementById('tmpop');if(o)o.remove()}
+document.addEventListener('click',function(e){
+ if(e.target.closest('[data-tmore]')){e.preventDefault();close();const t=today();
+  const ev=srt(holItems(t).filter(x=>x.cat!=='Bills').concat(evOn(t)).filter(x=>!(x.end&&x.end>x.date&&t>x.date&&t<x.end))).slice(4);
+  const o=document.createElement('div');o.id='tmpop';
+  o.innerHTML='<div class="tmbox"><div class="tmh">Also Today</div>'+ev.map(x=>{const tm=(x.time&&!(x.end&&x.end>x.date))?esc(tf(x.time)):'All Day';return '<button type="button" class="tev" data-a="tevopen" data-i="'+(x.hol?'':esc(String(x.id||'')))+'"><span class="tevt'+(tm==='All Day'?' ad':'')+'">'+tm+'</span><span class="tevn">'+esc(x.title)+'</span><span class="tevc">›</span></button>'}).join('')+'</div>';
+  document.body.appendChild(o);e.stopPropagation();return}
+ const o=document.getElementById('tmpop');if(o&&!e.target.closest('.tmbox .tmh'))setTimeout(close,0)
+},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+})()</script>
+<style>#tmpop{position:fixed;inset:0;z-index:300;background:rgba(30,20,16,.38);display:flex;align-items:center;justify-content:center;padding:24px}
+#tmpop .tmbox{background:#fffdfb;border-radius:20px;padding:16px 14px;width:100%;max-width:340px;max-height:70vh;overflow:auto;box-shadow:0 18px 50px rgba(40,25,20,.3)}
+#tmpop .tmh{font-weight:800;font-size:17px;color:#3d2c28;margin:0 4px 8px}
+#tmpop .tev{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;padding:10px 4px;border:0;border-top:1px solid #efe3df;background:none;font:inherit;color:#3d2c28}
+#tmpop .tevt{min-width:62px;font-weight:700;color:#7a5a52;font-size:14px}#tmpop .tevn{flex:1;min-width:0;overflow-wrap:anywhere}
+.tmore{display:block;margin-top:4px;padding:2px 8px;border-radius:999px;border:1px solid #d9bfb8;background:#fff;color:#7a4f48;font-size:11px;font-weight:700;white-space:nowrap}</style>
 <script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script></body>
 </html>
