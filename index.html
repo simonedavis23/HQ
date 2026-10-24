@@ -1111,7 +1111,7 @@ function lay(){const L=S.layout=S.layout||{};L.in=L.in||{};L.order=L.order||[];
  L.order=L.order.filter(k=>all.includes(k));return L}
 const hid=()=>(S.hidden=S.hidden||{});
 function hideTab(id){const L=lay();hid()[id]=1;if(id.startsWith('g:')){Object.keys(L.in).forEach(k=>{if(L.in[k]===id.slice(2))L.in[k]=''})}}
-const containerItems=c=>{const L=lay();return L.order.filter(k=>!hid()[k]).filter(k=>k!=='baby'||!!(typeof blChild==='function'&&blChild())).filter(k=>k.startsWith('g:')?c==='':(L.in[k]||'')===c)};
+const containerItems=c=>{const L=lay();const _o=c===''?['baby'].concat(L.order.filter(k=>k!=='baby')):L.order;return _o.filter(k=>!hid()[k]).filter(k=>k!=='baby'||!!(typeof blChild==='function'&&blChild())).filter(k=>k.startsWith('g:')?c==='':(L.in[k]||'')===c)};
 const items=c=>containerItems(c).map(id=>TBS().find(t=>t[0]===id)).filter(Boolean);
 function moveItem(id,dir){const L=lay(),c=id.startsWith('g:')?'':(L.in[id]||''),list=containerItems(c),i=list.indexOf(id),j=i+dir;if(j<0||j>=list.length)return;const a=L.order.indexOf(id),b=L.order.indexOf(list[j]);L.order[a]=list[j];L.order[b]=id}
 const grpInfo=g=>{const n=items(g.slice(2)).map(x=>x[1]);return n.length?(n.length>4?n.slice(0,3).concat('+'+(n.length-3)+' More'):n).join('\n'):'Empty'};
