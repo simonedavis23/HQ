@@ -287,6 +287,9 @@ details.bbset>p.m,details.hdet>p.m{font-size:13.5px}
 .sheetx form,.sheetx{box-sizing:border-box}
 @keyframes shin{from{opacity:0}to{opacity:1}}
 .wnew{background:color-mix(in srgb,var(--a) 8%,#fff);border:1px solid var(--line);border-radius:18px;padding:12px 14px;margin:0 0 12px}.wnew b{font-size:16px}.wnew ul{margin:6px 0 10px;padding-left:18px;font-size:14px;line-height:1.4}.wnew .btn{padding:9px 22px;font-weight:700;background:var(--a)!important;color:#fff!important;border:1px solid var(--a)!important}
+details.strow[open]>.grid{position:fixed!important;left:0;right:0;bottom:0;margin:0 auto!important;max-width:520px;z-index:200;max-height:72vh;overflow:auto;background:var(--card,#fffaf6);border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))!important;box-shadow:0 0 0 100vmax rgba(40,25,20,.38);box-sizing:border-box;animation:shin .2s ease-out}
+details.strow[open]>.grid::after{content:'';position:absolute;top:6px;left:50%;width:38px;height:4px;margin-left:-19px;border-radius:2px;background:rgba(120,90,80,.3)}
+.sxh{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 4px}.sxh b{font-size:18px}.sxh .btn{padding:8px 20px;font-weight:700;background:var(--a)!important;color:#fff!important;border:1px solid var(--a)!important}
 </style>
 </head>
 <body>
@@ -1887,6 +1890,10 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 (function(){const b=document.createElement('button');b.id='morebtn';b.type='button';b.setAttribute('aria-label','Menu');b.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';document.body.appendChild(b)})();
 {const _r=render;render=function(){_r.apply(this,arguments);mmClose()}}
 document.addEventListener('click',e=>{const sh=document.querySelector('.sheetx,.bbsh');if(!sh||!document.body.contains(e.target))return;if(sh.contains(e.target)||e.target.closest('#toast,#demobar,#morebtn,#mmenu'))return;e.preventDefault();e.stopPropagation();const c=[].find.call(sh.querySelectorAll('button,a'),x=>/^(cancel|close|done)$/i.test((x.textContent||'').trim()));if(c)c.click()},true);
+function sxEnhance(){document.querySelectorAll('details.strow[open]>.grid:not(.sxd)').forEach(g=>{g.classList.add('sxd');const t=g.parentNode.querySelector('summary .t'),n=t?((t.querySelector('b')||t).firstChild||{}).textContent||'':'';const h=document.createElement('div');h.className='sxh';h.innerHTML='<b></b><button type="button" class="btn" data-sx="done">Done</button>';h.firstChild.textContent=(n||'Edit').trim();g.insertBefore(h,g.firstChild)})}
+document.addEventListener('toggle',e=>{if(e.target&&e.target.matches&&e.target.matches('details.strow'))setTimeout(sxEnhance,0)},true);
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-sx]');if(b){e.preventDefault();const d=b.closest('details');if(d)d.open=false;return}const d=document.querySelector('details.strow[open]>.grid');if(!d||d.contains(e.target)||document.querySelector('.sheetx,.bbsh'))return;if(e.target.closest('#toast,#demobar,#morebtn,#mmenu'))return;e.preventDefault();e.stopPropagation();d.parentNode.open=false},true);
+{const _r2=render;render=function(){_r2.apply(this,arguments);sxEnhance()}}
 try{if(window.__demo){var db=document.createElement('div');db.id='demobar';db.innerHTML='Practice Copy · Your real binder is untouched · <a href="?new=reset">Start Over</a>';document.body.appendChild(db)}}catch(e){}
 try{onbCheck()}catch(e){}
 </script>
