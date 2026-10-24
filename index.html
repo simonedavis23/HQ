@@ -531,7 +531,7 @@ async function setCity(q){q=(q||'').trim();if(!q){delete S.loc;WXD=null;save();w
 let TDMORE=false;
 function todayCard(){const t=today(),din=(S.plan[t]||{}).Dinner,tk=S.tasks.filter(x=>!x.done&&x.due&&x.due<=t),ed=evDue(),ev=holItems(t).filter(x=>x.cat!=='Bills').concat(evOn(t)).filter(x=>!(x.end&&x.end>x.date&&t>x.date&&t<x.end)),bd=S.bills.filter(x=>!x.done&&x.due===t),od=S.bills.filter(x=>!x.done&&x.due&&x.due<t).length,T=nextTrip(t);
  const L=[];
- L.push(`<div class="trow"><span class="m">Dinner</span><b>${din?esc(din):'Not Planned Yet'}${(()=>{const sd=sideFor(recOn(t),t);const rc0=recOn(t);return rc0&&rc0.meal!=='Side'?` <button type="button" class="sdchip" data-sd="${t}">${sd?'Side: '+esc(sd[0]):'No Side'} ▾</button>`:''})()}</b></div>`);
+ L.push(`<div class="trow"><span class="m">Dinner</span><b>${din?esc(din):'Not Planned Yet'}${(()=>{const sd=sideFor(recOn(t),t);const rc0=recOn(t);return rc0&&rc0.meal!=='Side'?` <button type="button" class="sdchip" data-sd="${t}">${sideTxt(recOn(t),t)} ▾</button>`:''})()}</b></div>`);
  if(ev.length)L.push(`<div class="trow"><span class="m">Events${ev.length>4?`<button type="button" class="tmore" data-tmore="1">+${ev.length-4} More</button>`:''}</span><div class="tevs">${ev.slice().sort((p,q)=>{const a1=(p.time&&!(p.end&&p.end>p.date))?p.time:'',b1=(q.time&&!(q.end&&q.end>q.date))?q.time:'';return a1===b1?0:!a1?-1:!b1?1:a1.localeCompare(b1)}).slice(0,4).map(x=>{const lab=esc(x.end&&x.end>x.date&&x.end===t?'Ends today: '+x.title:x.title),tm=(x.time&&!(x.end&&x.end>x.date))?`<span class="tevt">${esc(tf(x.time))}</span>`:`<span class="tevt ad">All Day</span>`;const own=!x.hol&&x.id!=null,dn=own&&x.doneOn===t;return `<div class="tevw${dn?' dn':''}">${own?`<input type="checkbox" class="tevk" data-a="evt" data-i="${esc(String(x.id))}" data-d="${t}" ${dn?'checked':''} aria-label="Mark Done">`:'<span class="tevk"></span>'}<button type="button" class="tev" data-a="tevopen" data-i="${x.hol?'':esc(String(x.id||''))}">${tm}<span class="tevn">${lab}</span><span class="tevc">›</span></button>${own?`<button type="button" class="tevx" data-a="del" data-k="events" data-i="${esc(String(x.id))}" aria-label="Delete Event">✕</button>`:''}</div>`}).join('')}</div></div>`);
  {const sk=(S.skipd&&S.skipd.d===t?S.skipd.k:[]),pd=S.pday==null?0:+S.pday,I=[];
   const isPlan=new Date(t+'T12:00').getDay()===pd&&!sk.includes('plan'),isShop=T===t&&!sk.includes('shop'),shopDone=S.shopDone===t;
@@ -557,8 +557,10 @@ const effOf=r=>{if(!r)return 'Medium';if(r.effort)return r.effort;const t=(r.tit
  if(/roast|lasagna|braise|brisket|ribs|whole|stuffed|homemade|casserole|pot pie|wellington|from scratch|layered|baked ziti|meatloaf|prime|stew/.test(t))return 'Big';return 'Medium'};
 const recOn=d=>{const v=((S.plan[d]||{}).Dinner||'').trim().toLowerCase();return v?S.recipes.find(r=>r.title.toLowerCase()===v):null};
 const sideList=r=>SIDES[tagOf(r)]||SIDES.other;
-const sideFor=(r,d)=>{if(!r||r.meal==='Side')return null;const L=sideList(r);{const o=d&&S.sideo&&S.sideo[d];if(o){if(o==='-')return null;const m=L.find(x=>x[0]===o);return m||[o,cap(o)]}}if(r.side){const m=L.find(x=>x[0]===r.side);if(m)return m;return [r.side,cap(r.side)]}const n=(+(d||today()).slice(8)||1)+((r.title||'').length);return L[n%L.length]};
-function addSide(r,d){const sd=sideFor(r,d);if(!sd)return 0;const g=sd[1];if(S.groceries.some(x=>!x.done&&x.title.toLowerCase()===g.toLowerCase()))return 0;S.groceries.push({id:uid(),title:cap(g),qty:'',src:[{r:r.title,a:'Side',d:d||''}]});return 1}
+const sideFor=(r,d)=>{if(!r||r.meal==='Side')return null;const L=sideList(r);{const o=d&&S.sideo&&S.sideo[d];if(Array.isArray(o))return o.length?(L.find(x=>x[0]===o[0])||[o[0],cap(o[0])]):null;if(o){if(o==='-')return null;const m=L.find(x=>x[0]===o);return m||[o,cap(o)]}}if(r.side){const m=L.find(x=>x[0]===r.side);if(m)return m;return [r.side,cap(r.side)]}const n=(+(d||today()).slice(8)||1)+((r.title||'').length);return L[n%L.length]};
+const sidesFor=(r,d)=>{if(!r||r.meal==='Side')return [];const o=d&&S.sideo&&S.sideo[d];if(Array.isArray(o)){const L=sideList(r);return o.filter(n=>n&&n!=='-').map(n=>L.find(x=>x[0]===n)||[n,cap(n)])}const f=sideFor(r,d);return f?[f]:[]};
+const sideTxt=(r,d)=>{const a=sidesFor(r,d);return a.length?(a.length>1?'Sides: ':'Side: ')+a.map(x=>esc(x[0])).join(' + '):'No Side'};
+function addSide(r,d){let n=0;sidesFor(r,d).forEach(sd=>{const g=sd[1];if(S.groceries.some(x=>!x.done&&x.title.toLowerCase()===g.toLowerCase()))return;S.groceries.push({id:uid(),title:cap(g),qty:'',src:[{r:r.title,a:'Side',d:d||''}]});n++});return n}
 function autoFill(){const pool0=S.recipes.filter(r=>r.meal==='Dinner'),pool=pool0.length?pool0:S.recipes;if(!pool.length){msg='Add some recipes first, then I can fill your month.';return}
  const M=S.mealset||{out:5,left:1},sd=sel(),y=sd.slice(0,8),n=new Date(+y.slice(0,4),+y.slice(5,7),0).getDate(),t=today(),st=(sd.slice(0,7)===t.slice(0,7))?+t.slice(8):1,cnt={},recent=[],wkBig={};let f=0;
  pool.forEach(r=>cnt[r.title]=0);
@@ -1091,7 +1093,7 @@ const dinSel=(d,din)=>din?`<span class="dsw"><span class="dsv">${esc(din)} <i>�
   rem.forEach(x=>R.push(`<div class="wr"><i class="wb" style="background:var(--mut);opacity:.5"></i><div class="wt">${esc(x.title)}</div><span class="wm">Reminder</span></div>`));
   tk.forEach(x=>R.push(`<div class="wr ${x.done?'done':''}"><input type="checkbox" ${x.done?'checked':''} data-a="tt" data-i="${x.id}" aria-label="Complete ${esc(x.title)}"><div class="wt">${esc(x.title)}</div><span class="wm">Task</span></div>`));
   const rc=recOn(d),sd=rc?sideFor(rc,d):null;
-  R.push(`<div class="wr wdin"><span class="wfk">${fork}</span><div class="wt"><span class="wm">Dinner</span></div>${dinSel(d,din)}</div>`+(rc&&rc.meal!=='Side'?`<div class="wsd"><button type="button" class="sdchip" data-sd="${d}">${sd?'Side: '+esc(sd[0]):'No Side'} ▾</button></div>`:''));
+  R.push(`<div class="wr wdin"><span class="wfk">${fork}</span><div class="wt"><span class="wm">Dinner</span></div>${dinSel(d,din)}</div>`+(rc&&rc.meal!=='Side'?`<div class="wsd"><button type="button" class="sdchip" data-sd="${d}">${sideTxt(rc,d)} ▾</button></div>`:''));
   const emp=!evs.length&&!bl.length&&!rem.length&&!tk.length&&!din;return `<div class="wd${d===t?' tdy':''}${emp?' wempty':''}" id="d-${d}"><div class="wdh"><span class="wnum">${+d.slice(8)}</span><div><b class="wnm">${n}</b><span class="wm">${d===t?'Today':d===addD(t,1)?'Tomorrow':esc(short(d))}</span></div></div>${R.join('')}<div class="dta"><details class="dtadd"><summary>+ Event</summary><form data-k="calev" data-d="${d}"><input type="hidden" name="date" value="${d}"><input name="title" placeholder="Event Name" aria-label="Event for ${n}" required autocomplete="off"><input name="time" type="time" aria-label="Time" style="max-width:112px"><button class="btn">Add</button></form></details><details class="dtadd"><summary>+ Task</summary><form data-k="daytask" data-d="${d}"><input name="title" placeholder="Add A Task" aria-label="Add task for ${n}" required autocomplete="off"><button class="btn">Add</button></form></details></div></div>`}).join('');
 }
 function vWeek(){
@@ -2181,19 +2183,27 @@ body.home #ttl{font-size:25px!important}#ttl .lg{width:32px;height:32px;margin-r
 `;document.head.appendChild(css);
  function dlg(cls,html){var o=document.createElement('div');o.className='stdlg '+(cls||'');o.innerHTML='<div class="stdlgb">'+html+'</div>';document.body.appendChild(o);return o}
  /* --- sides --- */
- window.sideSet=function(d,val){S.sideo=S.sideo||{};var rc=recOn(d);var had=false;
+ window.sideSet=function(d,val){var rc=recOn(d);var had=false;S.sideo=S.sideo||{};
   S.groceries=S.groceries.filter(function(x){var m=!x.done&&x.src&&x.src.some(function(z){return z.a==='Side'&&z.d===d});if(m)had=true;return !m});
-  S.sideo[d]=val;if(had&&rc)addSide(rc,d);save()};
- window.sideDlg=function(d,cb){var rc=recOn(d);if(!rc)return;var L=sideList(rc),cur=sideFor(rc,d),curN=cur?cur[0]:'-';
-  var o=dlg('sdd','<b style="font-size:17px">Side For '+esc(rc.title)+'</b><p class="m" style="margin:2px 0 8px">'+esc(fmt(d))+'</p>'+L.map(function(x){return '<button type="button" class="btn sdopt'+(x[0]===curN?'':' ghost')+'" data-sv="'+esc(x[0])+'">'+esc(cap(x[0]))+(x[0]===curN?'  ✓':'')+'</button>'}).join('')+'<button type="button" class="btn sdopt'+(curN==='-'?'':' ghost')+'" data-sv="-">No Side'+(curN==='-'?'  ✓':'')+'</button><div style="display:flex;gap:8px;margin-top:6px"><input id="sdcustom" placeholder="Something Else" aria-label="Another side" style="flex:1"><button type="button" class="btn" data-sv="__c">Use</button></div><button type="button" class="lnk" style="margin-top:8px" data-sv="__x">Cancel</button>');
-  o.style.zIndex=200;
-  o.addEventListener('click',function(e){var b=e.target.closest('[data-sv]');if(!b&&e.target!==o)return;var v=b?b.getAttribute('data-sv'):'__x';if(v==='__x'){o.remove();return}if(v==='__c'){v=(o.querySelector('#sdcustom').value||'').trim();if(!v)return}o.remove();sideSet(d,v);render();if(cb)cb()})};
+  S.sideo[d]=Array.isArray(val)?val:(val==='-'?[]:[val]);if(had&&rc)addSide(rc,d);save()};
+ window.sideDlg=function(d,cb){var rc=recOn(d);if(!rc)return;var L=sideList(rc),cur=sidesFor(rc,d).map(function(x){return x[0]});
+  var o=dlg('sdd','');o.style.zIndex=200;
+  function draw(){var extra=cur.filter(function(n){return !L.some(function(x){return x[0]===n})});
+   var opts=L.map(function(x){return x[0]}).concat(extra);
+   o.querySelector('.stdlgb').innerHTML='<b style="font-size:17px">Sides For '+esc(rc.title)+'</b><p class="m" style="margin:2px 0 8px">'+esc(fmt(d))+' · Pick As Many As You Like</p>'+opts.map(function(n){var on=cur.indexOf(n)>-1;return '<button type="button" class="btn sdopt'+(on?'':' ghost')+'" data-sv="'+esc(n)+'" aria-pressed="'+on+'">'+esc(cap(n))+(on?'  ✓':'')+'</button>'}).join('')+'<button type="button" class="btn sdopt'+(cur.length?' ghost':'')+'" data-sv="__n">No Side'+(cur.length?'':'  ✓')+'</button><div style="display:flex;gap:8px;margin-top:6px"><input id="sdcustom" placeholder="Something Else" aria-label="Another side" style="flex:1"><button type="button" class="btn ghost" data-sv="__c">Add</button></div><button type="button" class="btn sdopt" style="margin-top:10px" data-sv="__d">Done</button><div style="text-align:center"><button type="button" class="lnk" style="margin-top:6px" data-sv="__x">Cancel</button></div>'}
+  draw();
+  o.addEventListener('click',function(e){var b=e.target.closest('[data-sv]');if(!b&&e.target!==o)return;var v=b?b.getAttribute('data-sv'):'__x';
+   if(v==='__x'){o.remove();return}
+   if(v==='__d'){o.remove();sideSet(d,cur);render();if(cb)cb();return}
+   if(v==='__n'){cur=[];draw();return}
+   if(v==='__c'){var t=(o.querySelector('#sdcustom').value||'').trim();if(!t)return;if(cur.indexOf(t)<0)cur.push(t);draw();return}
+   var ix=cur.indexOf(v);if(ix>-1)cur.splice(ix,1);else cur.push(v);draw()})};
  /* --- review of dinners before adding --- */
  function nightInfo(d){var dn=((S.plan[d]||{}).Dinner||'').trim();if(!dn)return{k:'none'};if(/^(eat out|take out|leftovers)$/i.test(dn))return{k:'skip',dn:dn};var rc=S.recipes.find(function(x){return x.title.toLowerCase()===dn.toLowerCase()});if(!rc)return{k:'norec',dn:dn};var ing=(typeof ingText==='function'?ingText(rc):(rc.ingredients||'')).split('\n').filter(function(l){return l.trim()}).length;return{k:ing?'ok':'noing',dn:dn,rc:rc,n:ing}}
  window.revRows=function(days){return days.map(function(d){var i=nightInfo(d),dd=new Date(d+'T12:00').toLocaleDateString(undefined,{weekday:'short'})+' '+new Date(d+'T12:00').getDate();
    if(i.k==='none')return '<div class="rvr"><div class="rvh"><em>'+dd+'</em><b style="font-weight:500;color:var(--mut)">Nothing Planned</b></div></div>';
    if(i.k==='skip')return '<div class="rvr"><div class="rvh"><em>'+dd+'</em><b>'+esc(i.dn)+'</b></div><div class="rvs">No shopping needed</div></div>';
-   var sd=i.rc?sideFor(i.rc,d):null,chip=i.rc&&i.rc.meal!=='Side'?'<button type="button" class="sdchip" data-sd="'+d+'" data-rv="1">'+(sd?'Side: '+esc(sd[0]):'No Side')+' ▾</button>':'';
+   var sd=i.rc?sideFor(i.rc,d):null,chip=i.rc&&i.rc.meal!=='Side'?'<button type="button" class="sdchip" data-sd="'+d+'" data-rv="1">'+sideTxt(i.rc,d)+' ▾</button>':'';
    var st=i.k==='norec'?'<div class="rvs warn">No recipe saved for this one, so nothing will be added.</div>':i.k==='noing'?'<div class="rvs warn">This recipe has no ingredients saved yet. <button type="button" class="lnk" data-rec="'+esc(i.rc.title)+'" data-rv="1">Open Recipe</button></div>':'<div class="rvs">'+i.n+' ingredient'+(i.n===1?'':'s')+' · <button type="button" class="lnk" data-rec="'+esc(i.rc.title)+'" data-rv="1">Check Recipe</button></div>';
    return '<div class="rvr"><div class="rvh"><em>'+dd+'</em><b>'+esc(i.dn)+'</b></div>'+st+(chip?'<div class="rvs">'+chip+'</div>':'')+'</div>'}).join('')};
  var RV=null;
