@@ -336,6 +336,26 @@ details.addf[open]>.sxw::after{content:'';position:absolute;top:6px;left:50%;wid
 
 details.strow[open]>.grid{grid-template-columns:1fr 1fr!important;gap:8px 10px!important}details.strow[open]>.grid>*{min-width:0}details.strow[open]>.grid>label.lb:has(input:not([type=number]):not([type=date]):not([type=time]),textarea),details.strow[open]>.grid>:not(label){grid-column:1/-1}details.strow[open]>.grid input,details.strow[open]>.grid select{width:100%;box-sizing:border-box;height:40px;padding:6px 10px;margin-top:2px}details.strow[open]>.grid textarea{width:100%;box-sizing:border-box}
 #ttl:not(.ttlh){padding:0 .35em .12em 0}html,body{overscroll-behavior-y:none}
+
+/* ---- Luxe polish ---- */
+.sdchip{color:var(--at)!important;font-weight:600}.dtadd>summary{color:var(--at)!important}
+.ckm{border:2px solid #c62828!important;width:20px!important;height:20px!important}[data-a=rg]{margin-top:10px!important}details.rec[data-od^="k:"]>summary::after,details.rec[data-od^="ct:"]>summary::after{margin-left:auto}details.rec[data-od^="k:"]>summary,details.rec[data-od^="ct:"]>summary{justify-content:flex-start!important;gap:8px}
+.bar{row-gap:10px!important}[data-a=rg]{margin-top:2px}
+:root{--at:color-mix(in srgb,var(--a) 58%,#2b1a1c)}
+.dtadd>summary,.sdchip,.onbc,.hchip,.pill:not(.dark):not(.on),.btn.ghost,.lnk,.tnot{color:var(--at)}
+.tk .tgo{color:var(--at)}.tnot{font-weight:600}
+.sdchip{border-color:color-mix(in srgb,var(--a) 55%,transparent)}
+.ckm{width:20px;height:20px;border:2px solid #c62828;border-radius:5px}
+.panel.gp h3{text-transform:capitalize;letter-spacing:.01em}
+.ghint{font-size:13px;opacity:.8}
+details.addf:not([open]):has(+details.addf:not([open])),details.addf:not([open])+details.addf:not([open]){display:inline-block;margin-right:8px;vertical-align:top}
+.bcard,.panel{box-shadow:0 10px 30px -14px rgba(90,50,40,.28),0 1px 0 rgba(255,255,255,.7) inset}
+details.rec[data-od^="k:"]>summary,details.rec[data-od^="ct:"]>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;font-size:16px;font-weight:600;padding:12px 0;min-height:48px;cursor:pointer}
+details.rec[data-od^="k:"]>summary::-webkit-details-marker,details.rec[data-od^="ct:"]>summary::-webkit-details-marker{display:none}
+details.rec[data-od^="k:"]>summary::after,details.rec[data-od^="ct:"]>summary::after{content:'›';font-size:22px;color:var(--mut);transition:transform .2s}
+details.rec[data-od^="k:"][open]>summary::after,details.rec[data-od^="ct:"][open]>summary::after{transform:rotate(90deg)}
+.bbadd{display:grid!important;grid-template-columns:1fr auto;gap:8px}.bbadd #bb-kn{grid-column:1/-1}.bbadd input{height:42px;box-sizing:border-box;min-width:0;width:100%}
+#rsrch,input[aria-label="Search recipes"]{min-width:0!important}
 </style>
 </head>
 <body>
@@ -606,7 +626,7 @@ function vGroc2(){
  const rows=AISLES.filter(a=>by[a]).map(a=>`<h3>${a}</h3>`+by[a].sort((p,r)=>(p.done?1:0)-(r.done?1:0)).map(x=>`<div class="row ${x.done?'done':''}"><input type="checkbox" ${x.done?'checked':''} data-a="gt" data-i="${x.id}" aria-label="Got it"><div class="t gname" data-ge="${x.id}">${esc(cap(x.title))}${x.qty?`<span class="m"> · ${esc(x.qty)}</span>`:''}${gSrc(x)}</div>${del('groceries',x.id)}</div>`).join('')).join('');
  const has=S.groceries.some(x=>!x.done),pst=gtools==='menu'?`<div class="gtools"><div class="bar" style="margin:0"><button class="btn" data-say="pack:groceries">Pick From Lists</button>${S.groceries.some(x=>x.src&&x.src.length)||(S.pchk||[]).length?`<button class="btn ghost" data-wm="meals">Remove By Meal</button><button class="btn ghost" data-grm="1">Remove All Dinner Ingredients (${S.groceries.filter(x=>x.src&&x.src.length).length+(S.pchk||[]).length})</button>`:''}<button class="btn" data-a="gpick" data-v="paste">Paste A List</button><button class="btn ghost" data-a="gt2" data-v="wish">Wish List${(S.wishes||[]).length?' ('+S.wishes.length+')':''}</button>${has?'<button class="btn" data-a="gcopy">Copy List</button>':''}</div></div>`:gtools==='paste'?`<div class="gtools"><b>Paste A List</b><p class="m" style="margin:2px 0 8px">Paste your whole Alexa list. Each line becomes an item and sorts itself into the right section.</p><textarea name="gpaste" rows="5" placeholder="Paste List" aria-label="Paste list"></textarea><div class="bar" style="margin:8px 0 0"><button class="btn" data-a="gpaste">Add All</button><button class="btn ghost" data-a="gpick" data-v="menu">Back</button></div></div>`:gtools==='copy'?`<div class="gtools"><b>Your List</b><textarea rows="8" readonly aria-label="Your list" onfocus="this.select()" style="margin-top:6px">${esc(gshow)}</textarea><p class="m">Tap the box, then Copy.</p><div class="bar" style="margin:0"><button class="btn ghost" data-a="gpick" data-v="menu">Back</button></div></div>`:'',cp='';
  const pc=S.pchk||[],pcH=pc.length?`<div class="pchk"><b>Check Your Pantry</b><p class="m">These come from your recipes. Tell me what you already have and I will not ask again.</p>${pc.map(x=>`<div class="row"><div class="t">${esc(x.title)}</div><button class="btn ghost" data-a="pyes" data-i="${x.id}">Have It</button><button class="btn" data-a="pno" data-i="${x.id}">Need It</button></div>`).join('')}<div class="bar" style="margin:8px 0 0"><button class="btn ghost" data-a="pall">I Have All Of These</button></div></div>`:'';
- return `<section class="panel gp">`+gHead(has)+pst+pcH+(rows||(later.length?'':'<p class="empty">Your list is empty. Add what you need, or tap “Need” on a low inventory item.</p>'))+laterH+(S.groceries.some(x=>!x.done)?'<p class="m ghint">Tap An Item To Rename It. Press And Hold To Move It.</p>':'')+(S.groceries.some(x=>x.done)?'<div class="bar"><button class="btn ghost" data-a="clearg">Clear checked</button></div>':'')+'</section>';
+ return `<section class="panel gp">`+gHead(has)+pst+pcH+(rows||(later.length?'':'<p class="empty">Your list is empty. Add what you need, or tap “Need” on a low inventory item.</p>'))+laterH+(S.groceries.some(x=>!x.done)?'<p class="m ghint">Tap To Rename · Hold To Move</p>':'')+(S.groceries.some(x=>x.done)?'<div class="bar"><button class="btn ghost" data-a="clearg">Clear checked</button></div>':'')+'</section>';
 }
 const sel=()=>md||today();
 const addD=(d,n)=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()+n);return iso(x)};
@@ -617,7 +637,7 @@ const KW=[['Frozen','frozen|ice cream|popsicle|waffle|fries'],['Produce','apple|
 function aisleOf(t){t=(t||'').toLowerCase();for(const[a,r]of KW)if(r.test(t))return a;return 'Other'}
 const recLink=d=>{const r=S.recipes.find(r=>r.title.toLowerCase()===((S.plan[d]||{}).Dinner||'').trim().toLowerCase());return r&&r.link?`<a class="lnk" style="display:inline-block;margin:2px 0 4px" href="${esc(r.link)}" target="_blank" rel="noopener">Open in ReciMe</a>`:''};
 const RL=()=>{const t=q.trim().toLowerCase();return S.recipes.filter(r=>(!favOnly||r.fav)&&(!t||(r.title+' '+(r.ingredients||'')).toLowerCase().includes(t)))};
-const SB=()=>`<div class="bar"><input id="rq" type="search" placeholder="Search Recipes Or Ingredients" aria-label="Search recipes" value="${esc(q)}" style="flex:1;min-width:160px"><button class="btn ${favOnly?'':'ghost'}" data-a="favonly">★ Favorites</button></div>`;
+const SB=()=>`<div class="bar"><input id="rq" type="search" placeholder="Search Recipes" aria-label="Search recipes" value="${esc(q)}" style="flex:1;min-width:160px"><button class="btn ${favOnly?'':'ghost'}" data-a="favonly">★ Favorites</button></div>`;
 function copyPlan(week){const s=sel();let days=[],off;
  if(week){const st=monday(s);for(let i=0;i<7;i++)days.push(addD(st,i));off=7}
  else{const p=s.slice(0,8),n=new Date(+p.slice(0,4),+p.slice(5,7),0).getDate();for(let d=1;d<=n;d++)days.push(p+String(d).padStart(2,'0'));off=28}
@@ -1050,7 +1070,7 @@ function vEmerg(){const row=x=>{const t=(f,l,ty)=>tin('emergency',x,f,l,ty),ph=/
 const starsOf=w=>(S.stars||[]).filter(z=>z.who===w).reduce((t,z)=>t+z.pts,0);
 function streakOf(w){const days=new Set((S.stars||[]).filter(z=>z.who===w&&z.pts>0).map(z=>z.d));let d=today(),n=0;if(!days.has(d))d=addD(d,-1);while(days.has(d)){n++;d=addD(d,-1)}return n}
 function vChores2(){const t=today(),G={};S.stars=S.stars||[];S.rewards=S.rewards||[];S.chores.forEach(x=>{const w=x.who||'Everyone';(G[w]=G[w]||[]).push(x)});
- const rows=L=>L.map(x=>`<div class="row ${x.doneOn===t?'done':''}">${x.kind==='Chore'?`<input type="checkbox" ${x.doneOn===t?'checked':''} data-a="cdone" data-i="${x.id}" aria-label="Done today">`:''}<div class="t">${esc(x.title)}${x.when?`<div class="m">${esc(x.when)}</div>`:''}</div>${x.kind==='Chore'?`<button class="btn ghost" data-a="cpts" data-i="${x.id}" aria-label="Stars for this chore. Tap to change." style="${(x.pts||1)>1?'padding:4px 10px':'padding:4px 8px;border-color:transparent;background:none;opacity:.4'}">⭐${(x.pts||1)>1?x.pts:''}</button>`:''}${del('chores',x.id)}</div>`).join('');
+ const rows=L=>L.map(x=>`<div class="row ${x.doneOn===t?'done':''}">${x.kind==='Chore'?`<input type="checkbox" ${x.doneOn===t?'checked':''} data-a="cdone" data-i="${x.id}" aria-label="Done today">`:''}<div class="t">${esc(x.title)}${x.when?`<div class="m">${esc(x.when)}</div>`:''}</div>${x.kind==='Chore'?`<button class="btn ghost" data-a="cpts" data-i="${x.id}" aria-label="Stars for this chore. Tap to change." style="${(x.pts||1)>1?'padding:4px 10px':'padding:4px 8px;border-color:transparent;background:none;opacity:.7'}">⭐${(x.pts||1)>1?x.pts:''}</button>`:''}${del('chores',x.id)}</div>`).join('');
  const head=w=>{const n=starsOf(w),st=streakOf(w);return (S.stars.some(z=>z.who===w))?` <span class="m" style="font-weight:400">⭐ ${n}${st>1?' · 🔥 '+st+' days':''}</span>`:''};
  const people=Object.keys(G).filter(w=>w!=='Everyone'&&G[w].some(x=>x.kind==='Chore')).sort();
  const rw=`<details class="addf" data-od="rewards"${WOPEN.has('rewards')?' open':''}><summary>⭐ Rewards</summary><p class="m" style="margin:6px 0">Kids earn stars for each chore they check off. Trade stars for rewards you choose, like screen time or a treat.</p>${S.rewards.map(r=>`<div class="row"><div class="t">${esc(r.title)}<div class="m">${r.cost} ⭐ ${people.filter(w=>starsOf(w)>=r.cost).map(w=>`<button class="btn" style="padding:3px 10px;margin:2px 4px 0 0" data-a="redeem" data-i="${r.id}" data-v="${esc(w)}">Redeem · ${esc(w)}</button>`).join('')}</div></div>${del('rewards',r.id)}</div>`).join('')}<form data-k="reward" class="grid" style="margin-top:8px"><input name="title" placeholder="Reward (e.g. Movie Night)" aria-label="Reward" required><input name="cost" type="number" min="1" inputmode="numeric" placeholder="Stars Needed" aria-label="Stars needed" required><button class="btn">Add Reward</button></form></details>`;
