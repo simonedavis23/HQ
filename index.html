@@ -584,11 +584,11 @@ function doBackup(){const data=JSON.stringify(S),name='my-life-backup-'+today()+
 function doIcs(){const t=today(),pad=n=>String(n).padStart(2,'0'),ymd=d=>d.replace(/-/g,''),esc2=v=>String(v||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'),stamp=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//My Life Binder//EN','CALSCALE:GREGORIAN'];
  const ev=(uid,title,date,end,time,note,rep)=>{L.push('BEGIN:VEVENT','UID:'+uid+'@mylife','DTSTAMP:'+stamp,'SUMMARY:'+esc2(title));
-  if(time){const hm=time.replace(':','')+'00';L.push('DTSTART:'+ymd(date)+'T'+hm)}else{L.push('DTSTART;VALUE=DATE:'+ymd(date),'DTEND;VALUE=DATE:'+ymd(addD(end&&end>date?end:date,1)))}
-  if(time)L.push('DURATION:PT1H');
+  const multi=!!(end&&end>date);if(time&&!multi){const hm=time.replace(':','')+'00';L.push('DTSTART:'+ymd(date)+'T'+hm)}else{L.push('DTSTART;VALUE=DATE:'+ymd(date),'DTEND;VALUE=DATE:'+ymd(addD(multi?end:date,1)),'TRANSP:TRANSPARENT')}
+  if(time&&!multi)L.push('DURATION:PT1H');
   if(note)L.push('DESCRIPTION:'+esc2(note));
   if(+rep)L.push('RRULE:FREQ=MONTHLY;INTERVAL='+(+rep));
-  L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+esc2(title),time?'TRIGGER:-PT30M':'TRIGGER:PT8H30M','END:VALARM','END:VEVENT')};
+  L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+esc2(title),time&&!multi?'TRIGGER:-PT30M':'TRIGGER:PT8H30M','END:VALARM','END:VEVENT')};
  if((S.calpref||{}).events!==false)S.events.forEach(x=>{if(x.ext)return;if((x.end||x.date)>=addD(t,-30)||+x.rep)ev(x.id,x.title,x.date,x.end,x.time,x.note,x.rep)});
  if((S.calpref||{}).bills===true)S.bills.filter(x=>!x.done&&x.due&&x.due>=t).forEach(x=>ev('bill'+x.id+x.due,'Due: '+x.title+(x.amount?' $'+x.amount:''),x.due,'','','',0));
  L.push('END:VCALENDAR');const data=L.join('\r\n'),name='my-life-calendar.ics';
