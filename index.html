@@ -319,7 +319,7 @@ details.addf[open]>.sxw::after{content:'';position:absolute;top:6px;left:50%;wid
 .sxw form{display:grid;gap:8px}.sxw form .btn,.sxw>.btn,.sxw .bar .btn{width:100%;padding:14px;font-size:16.5px;font-weight:700;border-radius:14px;background:var(--a)!important;color:#fff!important;border:1px solid var(--a)!important}.sxw input,.sxw select,.sxw textarea{font-size:16px;min-height:46px;box-sizing:border-box;width:100%}.sxw textarea{min-height:80px}
 .dch{margin:-2px 0 4px}.dch button{padding:6px 4px;min-height:38px;font-size:13.5px}
 .sxw form .btn{grid-column:1/-1}.sxw form select,.sxw form input{min-width:0}
-.sxw form label.lb,details.strow[open]>.grid label.lb{grid-column:1/-1}.sxw form label.lb input,.sxw form label.lb select{margin-top:4px}
+.sxw form label.lb,details.strow[open]>.grid label.lb{grid-column:auto}.sxw form label.lb input,.sxw form label.lb select{margin-top:4px}
 .tch.ce{margin:0 0 4px;gap:6px}.tch.ce button{padding:3px 4px;min-height:32px;font-size:13px;border-radius:11px}
 #wmsheet{position:fixed;inset:0;z-index:210}#wmsheet .wmbk{position:absolute;inset:0;background:rgba(40,25,20,.38)}#wmsheet .wmbox{position:absolute;left:0;right:0;bottom:0;margin:0 auto;max-width:520px;max-height:80vh;overflow:auto;background:var(--card,#fffaf6);color:var(--ink,#3a2d27);border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));box-sizing:border-box}
 #wmsheet .sxh{display:flex;align-items:center;justify-content:space-between;margin:2px 0 10px}#wmsheet .sxh b{font-size:19px}#wmsheet .sxx{width:36px;height:36px;border-radius:50%;border:0;background:rgba(120,90,80,.12);color:inherit;font-size:16px;cursor:pointer}
@@ -333,6 +333,9 @@ details.addf[open]>.sxw::after{content:'';position:absolute;top:6px;left:50%;wid
 .gp .row .cat{max-width:92px;font-size:12px;padding:5px 6px;opacity:.75;min-height:0}.gp .row .t{min-width:0}
 
 .tiles:not(.sub) .tile:has(span.gi:empty){min-height:96px!important;justify-content:center}.tiles:not(.sub) .tile:has(span.gi:empty) b{font-size:20px}
+
+details.strow[open]>.grid{grid-template-columns:1fr 1fr!important;gap:8px 10px!important}details.strow[open]>.grid>*{min-width:0}details.strow[open]>.grid>label.lb:has(input:not([type=number]):not([type=date]):not([type=time]),textarea),details.strow[open]>.grid>:not(label){grid-column:1/-1}details.strow[open]>.grid input,details.strow[open]>.grid select{width:100%;box-sizing:border-box;height:40px;padding:6px 10px;margin-top:2px}details.strow[open]>.grid textarea{width:100%;box-sizing:border-box}
+#ttl:not(.ttlh){padding:0 .35em .12em 0}html,body{overscroll-behavior-y:none}
 </style>
 </head>
 <body>
@@ -2155,7 +2158,7 @@ body.home #ttl{font-size:25px!important}#ttl .lg{width:32px;height:32px;margin-r
  /* pull down on Today opens search */
  var y0=0,x0=0,pull=false;
  document.addEventListener('touchstart',function(e){pull=false;if(tab!=='today'||window.scrollY>0||document.getElementById('srch')||ARR||tedit)return;var t=e.touches[0];if(e.target.closest('.sheetx,.bbsh,#mmenu,#tour,input,textarea,select'))return;y0=t.clientY;x0=t.clientX;pull=true},{passive:true});
- document.addEventListener('touchmove',function(e){if(!pull)return;var t=e.touches[0];if(t.clientY-y0>90&&Math.abs(t.clientX-x0)<40){pull=false;window.srchOpen()}else if(Math.abs(t.clientX-x0)>40)pull=false},{passive:true});
+ document.addEventListener('touchmove',function(e){if(!pull)return;var t=e.touches[0];if(t.clientY-y0>150&&Math.abs(t.clientX-x0)<30&&(t.clientY-y0)>3*Math.abs(t.clientX-x0)){pull=false;window.srchOpen()}else if(Math.abs(t.clientX-x0)>20)pull=false},{passive:true});
  var st=document.createElement('style');st.textContent='body.home{overscroll-behavior-y:contain}';document.head.appendChild(st);
 })();
 
